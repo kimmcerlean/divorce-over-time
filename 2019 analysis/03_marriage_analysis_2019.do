@@ -4,7 +4,9 @@
 * Kim McErlean
 ********************************************************************************
 
-use "$data_keep\PSID_marriage_recoded_sample.dta", clear // OLD file (When this was 1a and only through 2019)
+// use "$data_keep\PSID_marriage_recoded_sample.dta", clear // OLD file (When this was 1a and only through 2019)
+use "$created_data/2019/PSID_marriage_recoded_sample.dta", clear
+
 unique unique_id if inlist(IN_UNIT,0,1,2) // starting sample
 
 gen cohort=.

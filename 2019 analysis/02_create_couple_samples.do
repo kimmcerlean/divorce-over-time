@@ -6,7 +6,8 @@
 
 * Instead of just keeping those with relationship start 20000 - keeping those later, to try to validate other findings (e.g. Killewald, Schwartz and GP). Since just marriage, can also do prior to 1983?
 
-use "$data_tmp\PSID_full_long.dta", clear // created in other step 1
+// use "$data_tmp\PSID_full_long.dta", clear // created in other step 1
+use  "$temp/2019/PSID_data_long.dta", clear
 
 // need to replace all "id" with INTERVIEW_NUM_, okay wait no unique ID
 // BUT interview_num_ to match later
@@ -23,10 +24,9 @@ replace relationship=1 if inrange(MARITAL_PAIRS_,1,4)
 
 browse survey_yr unique_id main_per_id SEQ_NUMBER_ relationship RELATION_ FIRST_MARRIAGE_YR_START 
 
-bysort unique_id (SEQ_NUMBER_): egen in_sample=max(SEQ_NUMBER_)
-
-drop if in_sample==0 // people with NO DATA in any year
-drop if SEQ_NUMBER_==0 // won't have data because not in that year -- like SIPP, how do I know if last year is because divorced or last year in sample? right now individual level file, so fine - this is JUST last year in sample at the moment
+// bysort unique_id (SEQ_NUMBER_): egen in_sample=max(SEQ_NUMBER_)
+// drop if in_sample==0 // people with NO DATA in any year
+// drop if SEQ_NUMBER_==0 // won't have data because not in that year -- like SIPP, how do I know if last year is because divorced or last year in sample? right now individual level file, so fine - this is JUST last year in sample at the moment
 
 browse survey_yr INTERVIEW_NUM_ main_per_id relationship RELATION_ FIRST_MARRIAGE_YR_START FIRST_MARRIAGE_YR_HEAD_ FIRST_MARRIAGE_YR_END RECENT_MARRIAGE_YR_START 
 
@@ -65,7 +65,7 @@ bysort unique_id (rel4_start): replace rel4_start=rel4_start[1]
 sort unique_id survey_yr
 browse unique_id survey_yr MARITAL_STATUS_HEAD_ enter_rel relationship_start rel1_start FIRST_MARRIAGE_YR_START rel2_start marrno
 
-browse unique_id survey_yr MARITAL_STATUS_HEAD_ enter_rel relationship_start rel1_start FIRST_MARRIAGE_YR_START rel2_start marrno id_spouse1 per_no_spouse1 yr_married1 id_spouse2 per_no_spouse2 yr_married2 in_marital_history MARITAL_PAIRS_
+browse unique_id survey_yr MARITAL_STATUS_HEAD_ enter_rel relationship_start rel1_start FIRST_MARRIAGE_YR_START rel2_start marrno spouse_fam_id1 spouse_per_id1 yr_married1 spouse_fam_id2 spouse_per_id2 yr_married2 in_marital_history MARITAL_PAIRS_
 
 
 gen relationship_end = survey_yr if exit_rel==1
@@ -122,21 +122,21 @@ replace status_all = status2 if survey_yr>=rel2_start & survey_yr <=rel2_end
 replace status_all = status3 if survey_yr>=rel3_start & survey_yr <=rel3_end
 replace status_all = status4 if survey_yr>=rel4_end & survey_yr <=rel4_end
 
-gen spouse_id_all=.
-replace spouse_id_all = id_spouse1 if survey_yr>=rel1_start & survey_yr <=rel1_end
-replace spouse_id_all = id_spouse2 if survey_yr>=rel2_start & survey_yr <=rel2_end
-replace spouse_id_all = id_spouse3 if survey_yr>=rel3_start & survey_yr <=rel3_end
-replace spouse_id_all = id_spouse4 if survey_yr>=rel4_end & survey_yr <=rel4_end
+gen spouse_fam_id=.
+replace spouse_fam_id = spouse_fam_id1 if survey_yr>=rel1_start & survey_yr <=rel1_end
+replace spouse_fam_id = spouse_fam_id2 if survey_yr>=rel2_start & survey_yr <=rel2_end
+replace spouse_fam_id = spouse_fam_id3 if survey_yr>=rel3_start & survey_yr <=rel3_end
+replace spouse_fam_id = spouse_fam_id4 if survey_yr>=rel4_end & survey_yr <=rel4_end
 
-gen spouse_per_num_all=.
-replace spouse_per_num_all = per_no_spouse1 if survey_yr>=rel1_start & survey_yr <=rel1_end
-replace spouse_per_num_all = per_no_spouse2 if survey_yr>=rel2_start & survey_yr <=rel2_end
-replace spouse_per_num_all = per_no_spouse3 if survey_yr>=rel3_start & survey_yr <=rel3_end
-replace spouse_per_num_all = per_no_spouse4 if survey_yr>=rel4_end & survey_yr <=rel4_end
+gen spouse_per_id=.
+replace spouse_per_id = spouse_per_id1 if survey_yr>=rel1_start & survey_yr <=rel1_end
+replace spouse_per_id = spouse_per_id2 if survey_yr>=rel2_start & survey_yr <=rel2_end
+replace spouse_per_id = spouse_per_id3 if survey_yr>=rel3_start & survey_yr <=rel3_end
+replace spouse_per_id = spouse_per_id4 if survey_yr>=rel4_end & survey_yr <=rel4_end
 
 label values status_all status
 
-browse id survey_yr relationship marrno  rel_start_all rel_end_all rel1_start rel1_end rel2_start rel2_end spouse_id_all spouse_per_num_all id_spouse1 id_spouse2 per_no_spouse1 per_no_spouse2
+browse id survey_yr relationship marrno  rel_start_all rel_end_all rel1_start rel1_end rel2_start rel2_end spouse_fam_id spouse_per_id spouse_fam_id1 spouse_fam_id2 spouse_per_id1 spouse_per_id2
 
 gen relationship_order=.
 
@@ -145,8 +145,6 @@ forvalues r=1/4{
 }
 
 browse unique_id survey_yr relationship relationship_order rel_start_all rel_end_all rel1_start rel1_end rel2_start rel2_end
-
-bysort unique_id: egen last_survey_yr = max(survey_yr)
 
 sort unique_id survey_yr
 browse unique_id survey_yr relationship rel_start_all rel_end_all exit_rel status1 status2
@@ -253,7 +251,8 @@ replace marriage_order_real = ct_marriages if marriage_order > ct_marriages & ma
 
 browse unique_id survey_yr relationship_type relationship_order marriage_order marriage_order_real rel_start_all rel_end_all ct_unions ct_marriages ct_cohab 
 
-save "$data_tmp\PSID_all_unions.dta", replace
+save "$temp/2019/PSID_all_unions.dta", replace
+// save "$data_tmp\PSID_all_unions.dta", replace
 
 ********************************************************************************
 **# Recodes
@@ -843,7 +842,7 @@ tab in_marital_history if dissolve==1 & MARITAL_PAIRS_==0,m // is in marital his
 // merge cohabitation history for head
 // merge 1:1 survey_yr main_per_id INTERVIEW_NUM_ using "$data_tmp\PSID_partner_history.dta", keepusing(MX8* partner_1968_id* partner_per_num*) // lol now only 724 matched
 // lol okay match rate SUPER low here when WIDE- 1000
-merge m:1 unique_id using "$data_tmp\PSID_partner_history.dta", keepusing(MX8* partner_1968_id* partner_per_num*) // still only 48000 which seems low (when wide). okay try LONG -- okay this was my best bet... I AM DUMB - it shouldn;t all match because it is only people who ever had A COHABITING partner, not others.
+merge m:1 unique_id using "$temp/2019/PSID_partner_history.dta", keepusing(MX8* partner_1968_id* partner_per_num*) // still only 48000 which seems low (when wide). okay try LONG -- okay this was my best bet... I AM DUMB - it shouldn;t all match because it is only people who ever had A COHABITING partner, not others. // "$data_tmp\PSID_partner_history.dta"
 
 drop if _merge==2 // people not in my sample
 gen ever_cohab_head = 1 if _merge==3
@@ -855,7 +854,7 @@ foreach var in MX8* partner_1968_id* partner_per_num*{
 }
 
 // k now trying to match on PARTNER id to get HER history
-merge m:1 spouse_per_num_all spouse_id_all using "$data_tmp\PSID_partner_history.dta", keepusing(MX8* partner_1968_id* partner_per_num*) // less matches but I am not surprised about this (i don't think??
+merge m:1 spouse_fam_id spouse_per_id using "$temp/2019/PSID_partner_history.dta", keepusing(MX8* partner_1968_id* partner_per_num*) // less matches but I am not surprised about this (i don't think??
 
 drop if _merge==2 // people not in my sample
 gen ever_cohab_wife = 1 if _merge==3
@@ -869,7 +868,8 @@ foreach var in MX8* partner_1968_id* partner_per_num*{
 rename partner_1968_id*_head_wife partner_1968_id*_head
 rename partner_per_num*_head_wife partner_per_num*_head
 
-save "$data_keep\PSID_union_validation_sample.dta", replace
+// save "$data_keep\PSID_union_validation_sample.dta", replace
+save "$created_data/2019/PSID_union_validation_sample.dta", replace
 
 **# Pivot to marriage only file
 
@@ -877,26 +877,26 @@ keep if relationship_type==2
 
 // okay create cohabitation variables
 sort unique_id survey_yr
-browse unique_id survey_yr ever_cohab_head spouse_per_num_all spouse_id_all rel_start_all rel_end_all partner_1968_id*_head partner_per_num*_head
+browse unique_id survey_yr ever_cohab_head spouse_per_id spouse_fam_id rel_start_all rel_end_all partner_1968_id*_head partner_per_num*_head
 
 forvalues y=1968/1997{
 	gen cohab_`y'_with_wife=0
-	replace cohab_`y'_with_wife=1 if `y' <= rel_start_all & partner_1968_id`y'_head==spouse_id_all & partner_per_num`y'_head==spouse_per_num_all
+	replace cohab_`y'_with_wife=1 if `y' <= rel_start_all & partner_1968_id`y'_head==spouse_fam_id & partner_per_num`y'_head==spouse_per_id
 }
 
 forvalues y=1999(2)2019{
 	gen cohab_`y'_with_wife=0
-	replace cohab_`y'_with_wife=1 if `y' <= rel_start_all & partner_1968_id`y'_head==spouse_id_all & partner_per_num`y'_head==spouse_per_num_all
+	replace cohab_`y'_with_wife=1 if `y' <= rel_start_all & partner_1968_id`y'_head==spouse_fam_id & partner_per_num`y'_head==spouse_per_id
 }
 
 forvalues y=1968/1997{
 	gen cohab_`y'_other=0
-	replace cohab_`y'_other=1 if `y' <= rel_start_all & ((partner_1968_id`y'_head!=spouse_id_all & spouse_id_all!=. & partner_1968_id`y'_head!=.) | (partner_per_num`y'_head!=spouse_per_num_all & spouse_per_num_all!=. & partner_per_num`y'_head!=.))
+	replace cohab_`y'_other=1 if `y' <= rel_start_all & ((partner_1968_id`y'_head!=spouse_fam_id & spouse_fam_id!=. & partner_1968_id`y'_head!=.) | (partner_per_num`y'_head!=spouse_per_id & spouse_per_id!=. & partner_per_num`y'_head!=.))
 	}
 
 forvalues y=1999(2)2019{
 	gen cohab_`y'_other=0
-	replace cohab_`y'_other=1 if `y' <= rel_start_all & ((partner_1968_id`y'_head!=spouse_id_all & spouse_id_all!=. & partner_1968_id`y'_head!=.) | (partner_per_num`y'_head!=spouse_per_num_all & spouse_per_num_all!=. & partner_per_num`y'_head!=.))
+	replace cohab_`y'_other=1 if `y' <= rel_start_all & ((partner_1968_id`y'_head!=spouse_fam_id & spouse_fam_id!=. & partner_1968_id`y'_head!=.) | (partner_per_num`y'_head!=spouse_per_id & spouse_per_id!=. & partner_per_num`y'_head!=.))
 }
 
 
@@ -910,7 +910,7 @@ forvalues y=1999(2)2019{
 	replace cohab_`y'_after=1 if `y' >= rel_end_all & partner_1968_id`y'_head!=. & partner_per_num`y'_head!=.
 }
 
-browse unique_id survey_yr ever_cohab_head spouse_per_num_all spouse_id_all rel_start_all rel_end_all cohab_*_with_wife cohab_*_other partner_1968_id*_head partner_per_num*_head
+browse unique_id survey_yr ever_cohab_head spouse_per_id spouse_fam_id rel_start_all rel_end_all cohab_*_with_wife cohab_*_other partner_1968_id*_head partner_per_num*_head
 
 egen cohab_with_wife = rowtotal(cohab_*_with_wife)
 replace cohab_with_wife = 1 if cohab_with_wife > 1 & cohab_with_wife!=.
@@ -923,11 +923,12 @@ replace cohab_after = 1 if cohab_after > 1 & cohab_after!=.
 
 browse unique_id ever_cohab_head cohab_with_other cohab_with_wife // about 14000 of ever cohab not accounted for - only 44 other, so put as other? OR are they missing marital history and I need to figure out?
 
-browse unique_id survey_yr ever_cohab_head spouse_per_num_all spouse_id_all rel_start_all rel_end_all partner_1968_id*_head partner_per_num*_head if ever_cohab_head==1 & cohab_with_other==0 & cohab_with_wife==0 & cohab_after==0
+browse unique_id survey_yr ever_cohab_head spouse_per_id spouse_fam_id rel_start_all rel_end_all partner_1968_id*_head partner_per_num*_head if ever_cohab_head==1 & cohab_with_other==0 & cohab_with_wife==0 & cohab_after==0
 
 tab rel_start_all if ever_cohab_head==1 & cohab_with_other==0 & cohab_with_wife==0 & cohab_after==0 // okay 90%+ are relationships started in 1968, which I exclude anyway because I don't think all of these are accurate
 
-save "$data_keep\PSID_marriage_validation_sample.dta", replace
+save "$created_data/2019/PSID_marriage_validation_sample.dta", replace
+// save "$data_keep\PSID_marriage_validation_sample.dta", replace
 
 tab MARITAL_PAIRS_ if dissolve==1 // 35% have no spouse in year of dissolution - so all of my partner variables are moot.
 browse id survey_yr earnings_wife earnings_head female_earn_pct female_earn_pct_lag ft_head ft_wife educ_wife educ_head educ_type age_mar_wife MARITAL_PAIRS_ if dissolve==1 & MARITAL_PAIRS_==0
@@ -987,4 +988,6 @@ drop if dur==0 | dur==.
 drop if num_years==1
 drop if MARITAL_PAIRS_==0
 drop if SEX_HEAD_==2
-save "$data_keep\PSID_marriage_recoded_sample.dta", replace
+
+save "$created_data/2019/PSID_marriage_recoded_sample.dta", replace
+// save "$data_keep\PSID_marriage_recoded_sample.dta", replace
