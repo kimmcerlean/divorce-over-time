@@ -41,7 +41,8 @@ replace cohort_v3=1 if inrange(rel_start_all,1995,2014)
 // need to decide - ALL MARRIAGES or just first? - killewald restricts to just first, so does cooke. My validation is MUCH BETTER against those with first marraiges only...
 keep if (AGE_REF_>=18 & AGE_REF_<=55) &  (AGE_SPOUSE_>=18 & AGE_SPOUSE_<=55)
 unique unique_id if inlist(IN_UNIT,0,1,2) // sample now
-keep if marriage_order_real==1
+// keep if marriage_order_real==1 // I messed this up and it was not considering marriages prior to survey start
+keep if marr_no_mh ==1 
 unique unique_id if inlist(IN_UNIT,0,1,2) // sample now
 
 // drop those with no earnings or housework hours the whole time

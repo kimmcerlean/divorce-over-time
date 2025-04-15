@@ -251,6 +251,18 @@ replace marriage_order_real = ct_marriages if marriage_order > ct_marriages & ma
 
 browse unique_id survey_yr relationship_type relationship_order marriage_order marriage_order_real rel_start_all rel_end_all ct_unions ct_marriages ct_cohab 
 
+gen marr_no_mh=.
+
+forvalues r=1/13{
+	capture replace marr_no_mh=`r' if survey_yr>=yr_married`r' & survey_yr <=yr_end`r'
+	capture replace marr_no_mh=`r' if marr_no_mh==. & rel_start_all==yr_married`r' & rel_start_all!=.
+}
+
+tab marr_no_mh marriage_order, m
+tab marr_no_mh marriage_order_real ,m
+
+browse unique_id survey_yr relationship_type relationship_order marr_no_mh marriage_order marriage_order_real rel_start_all rel_end_all yr_married1 yr_married2 yr_married3 yr_married4 rel1_start rel2_start rel3_start rel4_start reltype1 reltype2 reltype3 reltype4 ct_unions ct_marriages ct_cohab 
+
 save "$temp/2019/PSID_all_unions.dta", replace
 // save "$data_tmp\PSID_all_unions.dta", replace
 
@@ -983,6 +995,10 @@ browse id survey_yr num_years rel_start_all rel_end_all dur earnings_wife MARITA
 browse id survey_yr num_years rel_start_all rel_end_all dur earnings_wife MARITAL_PAIRS_ dissolve dissolve_lag if id==376
 browse id survey_yr num_years rel_start_all rel_end_all dur earnings_wife MARITAL_PAIRS_ dissolve dissolve_lag if id==5614
 // okay some people also missing relationship start and end info for years here - so want to drop, but think this is going to ruin my dissolve_lag (as in the example above)
+
+// people in 2021 file but not 2019
+browse unique_id survey_yr RELATION_ relationship_type marrno marr_no_mh marriage_order marriage_order_real rel_start_all rel_end_all dur num_years MARITAL_PAIRS_ SEX_HEAD_ AGE_REF_ AGE_SPOUSE_ yr_married1 yr_married2 yr_married3 yr_married4 if inlist(unique_id, 4032, 47033, 50005, 541001, 875003, 2288034, 4794001, 6062001) 
+// examples where marriage order is ABOVE 1 (to compare in next file): 541001, 6062001
 
 drop if dur==0 | dur==.
 drop if num_years==1
