@@ -242,16 +242,18 @@ tab marital_status_updated exit_rel, m
 ** new indicator based on improved marital status and end dates
 gen dissolve=.
 replace dissolve=0 if relationship==1
-replace dissolve=1 if marital_status_updated==1 & marital_status_updated[_n+1]==5 & unique_id == unique_id[_n+1]  // & wave == wave[_n+1]-1 - okay, if the next time they appear, they are divorced, then this is probably fine?
-replace dissolve=1 if marital_status_updated==1 & marital_status_updated[_n+1]==6 & unique_id == unique_id[_n+1] & status_all!=1  // need to not capture temporary separations
-// okay, one fundamental problem here is that we don't always observe the marital status as divorced - if the interview happens in that year before the divorce? okay, so this is what the next part of the code is designed to do. BUT, this is then where the biennial years are causin challenges, because we might not have the survey year ever matching the end year if it's an off year.
-
-tab yr_end1 status1, m
 
 forvalues y=1/13{
 	capture replace dissolve=1 if survey_yr == yr_end`y' & inlist(status`y',4,5) // don't want WIDOWHOOD
 	capture replace dissolve=1 if survey_yr == (yr_end`y'-1) & inlist(status`y',4,5) & inlist(yr_end`y',1998,2000,2002,2004,2006,2008,2010,2012,2014,2016,2018,2020) // I think biennial years are causing problems, so update to prior year
+	capture replace dissolve=1 if dissolve==. & survey_yr == (yr_end`y'-1) & inlist(status`y',4,5)  // some are not in sample year of divorce either, but ONLY fill this in if dissolve is missing nOT 0.
 }
+
+replace dissolve=1 if marital_status_updated==1 & marital_status_updated[_n+1]==5 & unique_id == unique_id[_n+1]  & !inlist(status_all,1,3)  // & wave == wave[_n+1]-1 - okay, if the next time they appear, they are divorced, then this is probably fine?
+replace dissolve=1 if marital_status_updated==1 & marital_status_updated[_n+1]==6 & unique_id == unique_id[_n+1] & !inlist(status_all,1,3)  // need to not capture temporary separations
+// okay, one fundamental problem here is that we don't always observe the marital status as divorced - if the interview happens in that year before the divorce? okay, so this is what the next part of the code is designed to do. BUT, this is then where the biennial years are causin challenges, because we might not have the survey year ever matching the end year if it's an off year.
+
+tab yr_end1 status1, m
 
 // replace dissolve = 0 if dissolve==1 & survey_yr !=rel_end_all & survey_yr!=(rel_end_all-1)
 replace dissolve = 0 if dissolve==1 & dissolve[_n-1]==1 & inlist(marital_status_updated,5,6) & marital_status_updated[_n-1]==1 & unique_id==unique_id[_n-1] // there are people with two diff years recording as dissolved. putting it next to married one so I have both partners' info
@@ -1507,4 +1509,17 @@ save "$created_data/PSID_marriage_recoded_sample.dta", replace
 
 * new respondents (not in original file)
 // browse unique_id partner_unique_id survey_yr marital_status_updated dissolve dissolve_v0 rel_start_all rel_end_all matrix_marr_num relationship_order marr_no_estimated last_survey_yr yr_married1 yr_end1 yr_married2 yr_end1 yr_married3 yr_end3 if inlist(unique_id, 4033, 46030, 47033, 245033, 280033, 497032, 519030, 1241030, 1241033, 2876031, 2901031, 5994006, 5994008, 6822006)
+
+* ever dissolve status doesn't match between 2019 and 2021. 2019 has 0 and 2021 has 1
+tab status1, m
+tab ever_dissolve status1, m row
+unique unique_id if ever_dissolve==1, by(status1)
+tab status1 ever_dissolve, m row // so I think these discrepancies (50% of status1 = divorce but not ever dissolved) are because we didn't observe dissolve?
+// fixed the widowhood issue
+
+browse unique_id partner_unique_id survey_yr dur marital_status_updated ever_dissolve dissolve dissolve_v0 rel_start_all rel_end_all marr_no_estimated last_survey_yr yr_married1 yr_end1 status1 yr_married2 yr_end2 status2 yr_married3 yr_end3 MARITAL_PAIRS_ if inlist(unique_id, 7031, 7033, 84003, 297007, 419002, 809170, 1096003, 2707033, 6009032, 6864003) // okay, so not all of these ARE dissolved (there are widows and intact in here GAH)
+
+* ever dissolve status doesn't match between 2019 and 2021. 2019 has 1 and 2021 has 0
+browse unique_id partner_unique_id survey_yr dur marital_status_updated ever_dissolve dissolve dissolve_v0 rel_start_all rel_end_all marr_no_estimated last_survey_yr yr_married1 yr_end1 status1 yr_married2 yr_end2 status2 yr_married3 yr_end3 MARITAL_PAIRS_ if inlist(unique_id, 88030, 1051005, 2224005, 5539171, 5826003, 6048004)
+
 */

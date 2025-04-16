@@ -996,9 +996,12 @@ browse id survey_yr num_years rel_start_all rel_end_all dur earnings_wife MARITA
 browse id survey_yr num_years rel_start_all rel_end_all dur earnings_wife MARITAL_PAIRS_ dissolve dissolve_lag if id==5614
 // okay some people also missing relationship start and end info for years here - so want to drop, but think this is going to ruin my dissolve_lag (as in the example above)
 
-// people in 2021 file but not 2019
+// people in 2021 file but not 2019. okay, these people were the MARRIAGE ORDER problem, so solved that.
 browse unique_id survey_yr RELATION_ relationship_type marrno marr_no_mh marriage_order marriage_order_real rel_start_all rel_end_all dur num_years MARITAL_PAIRS_ SEX_HEAD_ AGE_REF_ AGE_SPOUSE_ yr_married1 yr_married2 yr_married3 yr_married4 if inlist(unique_id, 4032, 47033, 50005, 541001, 875003, 2288034, 4794001, 6062001) 
 // examples where marriage order is ABOVE 1 (to compare in next file): 541001, 6062001
+
+// again, people in 2021 but not 2019 (and duration > 1 because I know that some of this is because of below). okay yes, so this is then mostly because of NUMBER OF YEARS restriction.
+browse unique_id survey_yr rel_start_all rel_end_all dur num_years RELATION_ relationship_type marrno marr_no_mh marriage_order marriage_order_real MARITAL_PAIRS_ SEX_HEAD_ AGE_REF_ AGE_SPOUSE_ yr_married1 yr_married2 yr_married3 yr_married4 if inlist(unique_id, 4032, 4033, 105192, 694030, 833200, 2079179, 1336004, 1355030, 5812007, 5812211) 
 
 drop if dur==0 | dur==.
 drop if num_years==1
@@ -1007,3 +1010,16 @@ drop if SEX_HEAD_==2
 
 save "$created_data/2019/PSID_marriage_recoded_sample.dta", replace
 // save "$data_keep\PSID_marriage_recoded_sample.dta", replace
+
+/*
+* ever dissolve status doesn't match between 2019 and 2021. 2019 has 0 and 2021 has 1
+tab status1, m
+tab ever_dissolve status1, m row
+unique unique_id if ever_dissolve==1, by(status1)
+tab status1 ever_dissolve, m row // so I think these discrepancies (50% of status1 = divorce but not ever dissolved) are because we didn't observe dissolve?
+
+browse unique_id survey_yr dur relationship_type ever_dissolve dissolve dissolve_lag rel_start_all rel_end_all marr_no_mh last_survey_yr yr_married1 yr_end1 status1 yr_married2 yr_end2 status2 yr_married3 yr_end3 MARITAL_PAIRS_ if inlist(unique_id, 7031, 7033, 84003, 297007, 419002, 809170, 1096003, 2707033, 6009032, 6864003) // okay, so not all of these ARE dissolved (there are widows and intact in here GAH)
+
+* ever dissolve status doesn't match between 2019 and 2021. 2019 has 1 and 2021 has 0
+browse unique_id survey_yr dur relationship_type ever_dissolve dissolve dissolve_lag rel_start_all rel_end_all marr_no_mh last_survey_yr yr_married1 yr_end1 status1 yr_married2 yr_end2 status2 yr_married3 yr_end3 MARITAL_PAIRS_ if inlist(unique_id, 88030, 1051005, 2224005, 5539171, 5826003, 6048004)
+*/

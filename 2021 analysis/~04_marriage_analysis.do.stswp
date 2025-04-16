@@ -361,6 +361,10 @@ browse unique_id survey_yr rel_start_all dissolve rel_end_all last_survey_yr yr_
 
 // original: local controls "age_mar_wife age_mar_head i.race_head i.same_race i.either_enrolled i.region cohab_with_wife cohab_with_other pre_marital_birth"
 
+// preserve
+// collapse (max) ever_dissolve couple_educ_gp rel_start_all rel_end_all dur survey_yr if inlist(IN_UNIT,0,1,2) & inlist(cohort,0,1), by(unique_id partner_unique_id)
+// restore
+
 **# Analysis starts
 global controls "age_mar_wife age_mar_wife_sq age_mar_head age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region cohab_with_wife cohab_with_other pre_marital_birth  i.num_children i.interval i.home_owner"
 // global controls "age_mar_wife age_mar_wife_sq age_mar_head age_mar_head_sq i.raceth_head i.couple_joint_religion i.same_race i.either_enrolled i.region cohab_with_wife cohab_with_other pre_marital_birth  i.num_children i.interval i.home_owner"
