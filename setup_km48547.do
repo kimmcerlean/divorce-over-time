@@ -1,32 +1,55 @@
-global homedir "T:" // comment this out if you are not using the PRC Remote Server
+**********************************************************************************
+* Stats server
+**********************************************************************************
+if `"`c(hostname)'"' == "PPRC-STATS-P01"{
+	global homedir "T:" // comment this out if you are not using the PRC Remote Server
 
-* This is the base directory with the setup files.
-* It is the directory you should change into before executing any files
-global code "$homedir/github/divorce-over-time"
-
-
-* This locations of folders containing the original data files
-global PSID "/data/PSID"
-global SIPP2014 "/data/sipp/2014"
-global ACS "/data/ACS"
-global CPS "/data/CPS"
+	* This is the base directory with the setup files.
+	* It is the directory you should change into before executing any files
+	global code "$homedir/github/divorce-over-time"
 
 
-* Note that these directories will contain all "created" files - including intermediate data, results, and log files.
+	* This locations of folders containing the original data files
+	global PSID "/data/PSID"
+	global SIPP2014 "/data/sipp/2014"
+	global ACS "/data/ACS"
+	global CPS "/data/CPS"
 
-* created data files
-global created_data "$homedir/Research Projects/Dissertation - Union Dissolution/data_keep"
-global state_data "$homedir/Research Projects/State data/data_keep"
-global structural "$homedir/data/structural support measure"
 
-* results
-global results "$homedir/Research Projects/Dissertation - Union Dissolution/results"
+	* Note that these directories will contain all "created" files - including intermediate data, results, and log files.
 
-* logdir
-global logdir "$homedir/Research Projects/Dissertation - Union Dissolution/logs"
+	* created data files
+	global created_data "$homedir/Research Projects/Dissertation - Union Dissolution/data_keep"
+	global state_data "$homedir/Research Projects/State data/data_keep"
+	global structural "$homedir/data/structural support measure"
 
-* temporary data files (they get deleted without a second thought)
-global temp "$homedir/Research Projects/Dissertation - Union Dissolution/data_tmp"
+	* results
+	global results "$homedir/Research Projects/Dissertation - Union Dissolution/results"
+
+	* logdir
+	global logdir "$homedir/Research Projects/Dissertation - Union Dissolution/logs"
+
+	* temporary data files (they get deleted without a second thought)
+	global temp "$homedir/Research Projects/Dissertation - Union Dissolution/data_tmp"
+}
+
+**********************************************************************************
+* Personal computer
+**********************************************************************************
+if `"`c(hostname)'"' == "LAPTOP-TP2VHI6B"{
+	global homedir "G:\Other computers\My Laptop\Documents"
+	
+	global code "$homedir/Github/divorce-over-time"
+	
+	* created data files
+	global created_data "$homedir/Dissertation/Union Dissolution/data/created"
+	global results "$homedir/Dissertation/Union Dissolution/results"
+	global logdir "$homedir/Dissertation/Union Dissolution/data/log files"
+	global temp "$homedir/Dissertation/Union Dissolution/data/created/temp"
+
+}
+
+set maxvar 10000
 
 ********************************************************************************
 /* Create macro for current date
