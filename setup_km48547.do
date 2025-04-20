@@ -51,6 +51,9 @@ if `"`c(hostname)'"' == "LAPTOP-TP2VHI6B"{
 
 set maxvar 10000
 
+net install mecompare, from("https://tdmize.github.io/data/") replace
+// ssc install spost13_ado, replace
+
 ********************************************************************************
 /* Create macro for current date
 global logdate = string( d(`c(current_date)'), "%dCY.N.D" ) 		// create a macro for the date*/
