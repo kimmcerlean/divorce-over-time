@@ -559,123 +559,126 @@ unique unique_id partner_unique_id if dissolve==1 & couple_educ_gp==1, by(cohort
 svyset [pweight=weight]
 
 putexcel set "$results/Table1_Descriptives_weighted", replace
-putexcel B1:C1 = "Total", merge border(bottom)
-putexcel D1:E1 = "No College", merge border(bottom)
-putexcel F1:G1 = "College-Educated", merge border(bottom)
-putexcel B2 = ("All") C2 = ("Dissolved") D2 = ("All") E2 = ("Dissolved") F2 = ("All") G2 = ("Dissolved") , border(bottom)
+putexcel B1:D1 = "Total", merge border(bottom)
+putexcel E1:G1 = "No College", merge border(bottom)
+putexcel H1:J1 = "College-Educated", merge border(bottom)
+putexcel B2 = ("1970s") C2 = ("1980s") D2 = ("1990s") E2 = ("1970s") F2 = ("1980s") G2 = ("1990s") H2 = ("1970s") I2 = ("1980s") J2 = ("1990s"), border(bottom)
 putexcel A3 = "Unique Couples"
 putexcel A4 = "% Dissolved"
 
 // Means
-putexcel A6 = "Wife's share of earnings"
-putexcel A7 = "Husband employed full-time"
-putexcel A8 = "Wife employed full-time"
-putexcel A9 = "Dual Earning HH"
-putexcel A10 = "Male Breadwinner"
-putexcel A11 = "Female Breadwinner"
-putexcel A12 = "Wife's share of unpaid hours"
-putexcel A13 = "Equal"
-putexcel A14 = "Female Primary"
-putexcel A15 = "Male Primary"
-putexcel A16 = "Wife's race: White"
-putexcel A17 = "Wife's race: Black"
-putexcel A18 = "Husband's race: White"
-putexcel A19 = "Husband's race: Black"
-putexcel A20 = "Wife's education: LTHS"
-putexcel A21 = "Wife's education: hs"
-putexcel A22 = "Wife's education: some college"
-putexcel A23 = "Wife's education: college"
-putexcel A24 = "husband's education: LTHS"
-putexcel A25 = "husband's education: hs"
-putexcel A26 = "husband's education: some college"
-putexcel A27 = "husband's education: college"
-putexcel A28 = "Husband: White No"
-putexcel A29 = "Husband: White College"
-putexcel A30 = "Husband: Black No"
-putexcel A31 = "Husband: Black College"
-putexcel A32 = "Wife's age at marriage"
-putexcel A33 = "Husband's age at marriage"
-putexcel A34 = "Husband Wife Cohabit"
-putexcel A35 = "Other Premarital Cohabit"
-putexcel A36 = "First Birth Premarital"
-putexcel A37 = "Number of children"
-putexcel A38 = "Interval"
-putexcel A39 = "Interval: 1"
-putexcel A40 = "Interval: 2"
+putexcel A5 = "Wife's share of earnings"
+putexcel A6 = "Dual Earning HH"
+putexcel A7 = "Male Breadwinner"
+putexcel A8 = "Female Breadwinner"
+putexcel A9 = "Wife's share of unpaid hours"
+putexcel A10 = "Equal"
+putexcel A11 = "Female Primary"
+putexcel A12 = "Male Primary"
+putexcel A13 = "Egalitarian"
+putexcel A14 = "Second Shift"
+putexcel A15 = "Traditional"
+putexcel A16 = "Counter-Traditional"
+putexcel A17 = "All Other Female-Breadwinning"
+putexcel A18 = "Underwork"
+putexcel A19 = "All Others"
+putexcel A20 = "Average marital duration"
+putexcel A21 = "Age at marriage (wife)"
+putexcel A22 = "Age at marriage (husband)"
+putexcel A23 = "Couple owns home"
+putexcel A24 = "Couple has children"
+putexcel A25 = "Average number of children"
+putexcel A26 = "Cohabited prior to marriage"
+putexcel A27 = "Had premarital birth"
+putexcel A28 = "No College Degree"
+putexcel A29 = "College Degree"
 
-/* Medians
-putexcel A42 = "Median Couple Earnings"
-putexcel A43 = "Wife's annual earnings (median)"
-putexcel A44 = "Husband's annual earnings (median)"
-putexcel A45 = "Wife's weekly housework hours (median)"
-putexcel A46 = "Husband's weekly housework hours (median)"
-*/
-
-local meanvars "female_earn_pct ft_head ft_wife earn_type1 earn_type2 earn_type3 wife_housework_pct hw_type1 hw_type2 hw_type3 wife_white wife_black head_white head_black educ_wife1 educ_wife2 educ_wife3 educ_wife4 educ_head1 educ_head2 educ_head3 educ_head4 race_x_educ_head1 race_x_educ_head2 race_x_educ_head3 race_x_educ_head4 age_mar_wife age_mar_head cohab_with_wife cohab_with_other pre_marital_birth NUM_CHILDREN_ interval interval1 interval2"
-
-local medianvars "TAXABLE_HEAD_WIFE_ earnings_wife earnings_head housework_wife housework_head"
+local meanvars_ovrl "female_earn_pct_t1 earn_type1 earn_type2 earn_type3 wife_housework_pct_t hw_type1 hw_type2 hw_type3 earn_hw1 earn_hw2 earn_hw3 earn_hw4 earn_hw5 earn_hw6 earn_hw7 dur age_mar_wife age_mar_head home_owner  children NUM_CHILDREN_  cohab_with_wife pre_marital_birth couple_educ1 couple_educ2" // 25
+local meanvars "female_earn_pct_t1 earn_type1 earn_type2 earn_type3 wife_housework_pct_t hw_type1 hw_type2 hw_type3 earn_hw1 earn_hw2 earn_hw3 earn_hw4 earn_hw5 earn_hw6 earn_hw7 dur age_mar_wife age_mar_head home_owner  children NUM_CHILDREN_ cohab_with_wife pre_marital_birth" // 23
 
 
-// Overall: mean
-forvalues w=1/35{
-	local row=`w'+5
-	local var: word `w' of `meanvars'
-	svy: mean `var'
+// Overall: 1970s
+forvalues w=1/25{
+	local row=`w'+4
+	local var: word `w' of `meanvars_ovrl'
+	svy: mean `var' if cohort_det_v2==1
 	matrix t`var'= e(b)
 	putexcel B`row' = matrix(t`var'), nformat(#.#%)
 }
 
 
-// those who transitioned; value when dissolve_lag==1
-forvalues w=1/35{
-	local row=`w'+5
-	local var: word `w' of `meanvars'
-	svy: mean `var' if dissolve_lag==1
+// Overall: 1980s
+forvalues w=1/25{
+	local row=`w'+4
+	local var: word `w' of `meanvars_ovrl'
+	svy: mean `var' if cohort_det_v2==2
 	matrix t`var'= e(b)
 	putexcel C`row' = matrix(t`var'), nformat(#.#%)
 }
 
 
-**By education:
-
-
-// No college degree: overall
-forvalues w=1/35{
-	local row=`w'+5
-	local var: word `w' of `meanvars'
-	svy: mean `var' if couple_educ_gp==0
+// Overall: 1990s
+forvalues w=1/25{
+	local row=`w'+4
+	local var: word `w' of `meanvars_ovrl'
+	svy: mean `var' if cohort_det_v2==3
 	matrix t`var'= e(b)
 	putexcel D`row' = matrix(t`var'), nformat(#.#%)
 }
 
 
-// No college degree: those who transitioned
-forvalues w=1/35{
-	local row=`w'+5
+**By education:
+
+// No college degree: 1970s
+forvalues w=1/23{
+	local row=`w'+4
 	local var: word `w' of `meanvars'
-	svy: mean `var' if dissolve_lag==1 & couple_educ_gp==0
+	svy: mean `var' if couple_educ_gp==0 & cohort_det_v2==1
 	matrix t`var'= e(b)
 	putexcel E`row' = matrix(t`var'), nformat(#.#%)
 }
 
-
-// College degree: overall
-forvalues w=1/35{
-	local row=`w'+5
+// No college degree: 1980s
+forvalues w=1/23{
+	local row=`w'+4
 	local var: word `w' of `meanvars'
-	svy: mean `var' if couple_educ_gp==1
+	svy: mean `var' if couple_educ_gp==0 & cohort_det_v2==2
 	matrix t`var'= e(b)
 	putexcel F`row' = matrix(t`var'), nformat(#.#%)
 }
 
-
-// College degree: those who transitioned
-forvalues w=1/35{
-	local row=`w'+5
+// No college degree: 1990s
+forvalues w=1/23{
+	local row=`w'+4
 	local var: word `w' of `meanvars'
-	svy: mean `var' if dissolve_lag==1 & couple_educ_gp==1
+	svy: mean `var' if couple_educ_gp==0 & cohort_det_v2==3
 	matrix t`var'= e(b)
 	putexcel G`row' = matrix(t`var'), nformat(#.#%)
 }
 
+// College degree: 1970s
+forvalues w=1/23{
+	local row=`w'+4
+	local var: word `w' of `meanvars'
+	svy: mean `var' if couple_educ_gp==1 & cohort_det_v2==1
+	matrix t`var'= e(b)
+	putexcel H`row' = matrix(t`var'), nformat(#.#%)
+}
 
+// College degree: 1980s
+forvalues w=1/23{
+	local row=`w'+4
+	local var: word `w' of `meanvars'
+	svy: mean `var' if couple_educ_gp==1 & cohort_det_v2==2
+	matrix t`var'= e(b)
+	putexcel I`row' = matrix(t`var'), nformat(#.#%)
+}
+
+// College degree: 1990s
+forvalues w=1/23{
+	local row=`w'+4
+	local var: word `w' of `meanvars'
+	svy: mean `var' if couple_educ_gp==1 & cohort_det_v2==3
+	matrix t`var'= e(b)
+	putexcel J`row' = matrix(t`var'), nformat(#.#%)
+}

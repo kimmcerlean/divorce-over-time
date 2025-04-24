@@ -433,8 +433,7 @@ graph query colorstyle
 ********************************************************************************
 ********************************************************************************
 ********************************************************************************
-**# Final analysis for Sociological Science attempt and dissertation
-** Divorce over time
+**# Final analysis for divorce over time
 ** Updated April 2025 for Socius submission
 ********************************************************************************
 ********************************************************************************
@@ -443,141 +442,9 @@ unique unique_id if inlist(IN_UNIT,0,1,2) & inlist(cohort,0,1) // analytical sam
 unique unique_id if inlist(IN_UNIT,0,1,2) & inlist(cohort,0,1) & dissolve==1 // divorces analytical sample
 
 // First show changes in divorce rates over time, descriptively
-logit dissolve i.dur i.couple_educ_gp##i.cohort earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or
-margins cohort#couple_educ_gp
-marginsplot, xtitle("Marital Cohort") xlabel(0 "Early (1970-1994)" 1 "Late (1995-2014)", angle(45))  ytitle("Predicted Probability of Marital Dissolution") plotregion(fcolor(white)) graphregion(fcolor(white)) title("") legend(region(lcolor(white))) legend(pos(6)) legend(rows(1)) // ylabel(0(.01).06, angle(0))
-
-// then go into actual models of interest
-
-** College-educated
-// 1970-1994
-logit dissolve i.dur i.hh_earn_type_t1 i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
-margins, dydx(housework_bkt_t hh_earn_type_t1)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll1a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
-
-logit dissolve i.dur i.earn_type_hw earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
-margins, dydx(earn_type_hw)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll2a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-logit dissolve i.dur i.ft_t1_head i.ft_t1_wife i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
-margins, dydx(ft_t1_head ft_t1_wife housework_bkt_t)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll3a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-logit dissolve i.dur female_earn_pct_t1 wife_housework_pct_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
-margins, dydx(female_earn_pct_t1 wife_housework_pct_t)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll4a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-// 1995-2014
-logit dissolve i.dur i.hh_earn_type_t1 i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
-margins, dydx(housework_bkt_t hh_earn_type_t1)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll1b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-logit dissolve i.dur i.earn_type_hw earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
-margins, dydx(earn_type_hw)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll2b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-logit dissolve i.dur i.ft_t1_head i.ft_t1_wife i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
-margins, dydx(ft_t1_head ft_t1_wife housework_bkt_t)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll3b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-logit dissolve i.dur female_earn_pct_t1 wife_housework_pct_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
-margins, dydx(female_earn_pct_t1 wife_housework_pct_t)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll4b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-** Non-college-educated
-// 1970-1994
-logit dissolve i.dur i.hh_earn_type_t1 i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
-margins, dydx(housework_bkt_t hh_earn_type_t1)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll1a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-logit dissolve i.dur i.earn_type_hw earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
-margins, dydx(earn_type_hw)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll2a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-logit dissolve i.dur i.ft_t1_head i.ft_t1_wife i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
-margins, dydx(ft_t1_head ft_t1_wife housework_bkt_t)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll3a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-logit dissolve i.dur female_earn_pct_t1 wife_housework_pct_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
-margins, dydx(female_earn_pct_t1 wife_housework_pct_t)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll4a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-// 1995-2014
-logit dissolve i.dur i.hh_earn_type_t1 i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
-margins, dydx(housework_bkt_t hh_earn_type_t1)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll1b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-logit dissolve i.dur i.earn_type_hw earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
-margins, dydx(earn_type_hw)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll2b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-logit dissolve i.dur i.ft_t1_head i.ft_t1_wife i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
-margins, dydx(ft_t1_head ft_t1_wife housework_bkt_t)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll3b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-logit dissolve i.dur female_earn_pct_t1 wife_housework_pct_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
-margins, dydx(female_earn_pct_t1 wife_housework_pct_t)
-margins, dydx(*) post
-outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll4b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
-
-** Margins
-
-// College-educated
-// 1970-1994
-logit dissolve i.dur i.hh_earn_type_t1 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
-margins, dydx(hh_earn_type_t1)
-margins hh_earn_type_t1
-margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
-
-logit dissolve i.dur i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
-margins housework_bkt_t
-margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
-
-// 1995-2014
-logit dissolve i.dur i.hh_earn_type_t1 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
-margins hh_earn_type_t1
-margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
-
-logit dissolve i.dur i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
-margins housework_bkt_t
-margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
-
-local controls "age_mar_wife age_mar_wife_sq age_mar_head age_mar_head_sq i.race_head i.same_race i.either_enrolled i.region cohab_with_wife cohab_with_other pre_marital_birth  i.num_children i.interval i.home_owner"
-
-// Non-college-educated
-// 1970-1994
-logit dissolve i.dur i.hh_earn_type_t1 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
-margins, dydx(hh_earn_type_t1)
-margins hh_earn_type_t1
-margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
-
-logit dissolve i.dur i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
-margins housework_bkt_t
-margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
-
-// 1995-2014
-logit dissolve i.dur i.hh_earn_type_t1 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
-margins hh_earn_type_t1
-margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
-
-logit dissolve i.dur i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
-margins housework_bkt_t
-margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
+logit dissolve i.dur i.couple_educ_gp##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or
+margins cohort_det_v2#couple_educ_gp
+marginsplot, xtitle("Marital Cohort") xlabel(1 "1970s" 2 "1980s" 3 "1990s+")  ytitle("Predicted Probability of Marital Dissolution") plotregion(fcolor(white)) graphregion(fcolor(white)) title("") legend(region(lcolor(white))) legend(pos(6)) legend(rows(1)) // ylabel(0(.01).06, angle(0)) xlabel(1 "1970s" 2 "1980s" 3 "1990s+", angle(45))
 
 ********************************************************************************
 **# ** Interactions with time (instead of separate)
@@ -590,6 +457,8 @@ margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
 
 // Paid labor division
 logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4, cluster(unique_id) or // overall
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(Overall1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
+
 margins cohort_det_v2#hh_earn_type_t1
 marginsplot, xtitle("Marital Cohort") ylabel(, angle(0))  ytitle("Predicted Probability of Marital Dissolution") plotregion(fcolor(white)) graphregion(fcolor(white)) title("") legend(region(lcolor(white))) legend(pos(6)) legend(rows(1)) xlabel(1 "1970s" 2 "1980s" 3 "1990s+") plot1opts(lcolor("gs6") mcolor("gs6")) ci1opts(color("gs6")) plot3opts(lcolor("cranberry") mcolor("cranberry")) ci3opts(color("cranberry"))
 
@@ -603,6 +472,8 @@ marginsplot, xdimension(hh_earn_type_t1) bydimension(cohort_det_v2)  byopts(titl
 
 // Unpaid labor division
 logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4, cluster(unique_id) or // overall
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(Overall2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
 margins cohort_det_v2#housework_bkt_t
 marginsplot, xtitle("Marital Cohort") ylabel(, angle(0))  ytitle("Predicted Probability of Marital Dissolution") plotregion(fcolor(white)) graphregion(fcolor(white)) title("") legend(region(lcolor(white))) legend(pos(6)) legend(rows(1)) xlabel(1 "1970s" 2 "1980s" 3 "1990s+") plot1opts(lcolor("gs6") mcolor("gs6")) ci1opts(color("gs6")) plot3opts(lcolor("cranberry") mcolor("cranberry")) ci3opts(color("cranberry"))
 
@@ -623,6 +494,7 @@ xline(0, lcolor(black) lstyle(solid)) ylabel(2 "Dual: Woman" 3 "Dual: Man" 4 "Ma
 
 // Combined division of labor (just AMEs) - ALT measure
 logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(Overall3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3))
 marginsplot, bydimension(cohort_det_v2) recast(scatter) byopts(title("Marital Cohort") rows(1))  horizontal yscale(reverse) xtitle("Predicted Probability of Divorce") ytitle("Combined Division of Labor") ///
@@ -659,6 +531,7 @@ marginsplot, xdimension(ft_t1_wife) bydimension(cohort_det_v2) aspect(0.9) byopt
 
 // Her share of earnings
 logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or // overall
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(Overall4) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3))
 marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title("Marital Cohort") rows(1)) horizontal xline(0, lcolor(black) lstyle(solid)) xtitle("Predicted Probability of Divorce") ytitle("Her Share of Earnings") ylabel(none)
@@ -673,6 +546,7 @@ marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title
 
 // Her share of housework
 logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or // overall
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(Overall5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3))
 marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title("Marital Cohort") rows(1)) horizontal xline(0, lcolor(black) lstyle(solid)) xtitle("Predicted Probability of Divorce") ytitle("Her Share of Housework") ylabel(none)
@@ -697,6 +571,8 @@ marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title
 
 // Paid labor division
 logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & hh_earn_type_t1!=4, cluster(unique_id) or
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(College1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
 margins cohort_det_v2#hh_earn_type_t1
 marginsplot, xtitle("Marital Cohort") ylabel(, angle(0))  ytitle("Predicted Probability of Marital Dissolution") plotregion(fcolor(white)) graphregion(fcolor(white)) title("") legend(region(lcolor(white))) legend(pos(6)) legend(rows(1)) xlabel(1 "1970s" 2 "1980s" 3 "1990s+") plot1opts(lcolor("gs6") mcolor("gs6")) ci1opts(color("gs6")) plot3opts(lcolor("cranberry") mcolor("cranberry")) ci3opts(color("cranberry"))
 
@@ -709,10 +585,12 @@ marginsplot, xdimension(hh_earn_type_t1) bydimension(cohort_det_v2)  byopts(titl
 	xline(0, lcolor(black) lstyle(solid)) ylabel(2 "Male BW" 3 "Female BW")
 
 // margins, dydx(*) post
-// outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(CollInt) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+// outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(CollInt) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 // Unpaid labor division
 logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & housework_bkt_t!=4, cluster(unique_id) or
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(College2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
 margins cohort_det_v2#housework_bkt_t
 marginsplot, xtitle("Marital Cohort") ylabel(, angle(0))  ytitle("Predicted Probability of Marital Dissolution") plotregion(fcolor(white)) graphregion(fcolor(white)) title("") legend(region(lcolor(white))) legend(pos(6)) legend(rows(1)) xlabel(1 "1970s" 2 "1980s" 3 "1990s+") plot1opts(lcolor("gs6") mcolor("gs6")) ci1opts(color("gs6")) plot3opts(lcolor("cranberry") mcolor("cranberry")) ci3opts(color("cranberry"))
 
@@ -725,7 +603,7 @@ marginsplot, xdimension(housework_bkt_t) bydimension(cohort_det_v2)  byopts(titl
 	xline(0, lcolor(black) lstyle(solid)) ylabel(2 "Female HW" 3 "Male HW")
 	
 // margins, dydx(*) post
-// outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(CollInt HW) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+// outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(CollInt HW) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 // Combined division of labor (just AMEs)
 logit dissolve i.dur i.earn_type_hw##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or
@@ -736,6 +614,7 @@ xline(0, lcolor(black) lstyle(solid)) ylabel(2 "Dual: Woman" 3 "Dual: Man" 4 "Ma
 
 // Combined division of labor (just AMEs) - ALT measure
 logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(College3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3))
 marginsplot, bydimension(cohort_det_v2) recast(scatter) byopts(title("Marital Cohort") rows(1))  horizontal yscale(reverse) xtitle("Predicted Probability of Divorce") ytitle("Combined Division of Labor") ///
@@ -772,6 +651,7 @@ marginsplot, xdimension(ft_t1_wife) bydimension(cohort_det_v2) byopts(title("Mar
 
 // Her share of earnings
 logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or // overall
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(College4) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3))
 marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title("Marital Cohort") rows(1)) horizontal xline(0, lcolor(black) lstyle(solid)) xtitle("Predicted Probability of Divorce") ytitle("Her Share of Earnings") ylabel(none)
@@ -786,6 +666,7 @@ marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title
 	
 // Her share of housework
 logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or // overall
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(College5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3))
 marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title("Marital Cohort") rows(1)) horizontal xline(0, lcolor(black) lstyle(solid)) xtitle("Predicted Probability of Divorce") ytitle("Her Share of Housework") ylabel(none)
@@ -810,6 +691,8 @@ marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title
 
 // Paid labor division
 logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & hh_earn_type_t1!=4, cluster(unique_id) or
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(NoColl1) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
 margins cohort_det_v2#hh_earn_type_t1
 marginsplot, xtitle("Marital Cohort") ylabel(, angle(0))  ytitle("Predicted Probability of Marital Dissolution") plotregion(fcolor(white)) graphregion(fcolor(white)) title("") legend(region(lcolor(white))) legend(pos(6)) legend(rows(1)) xlabel(1 "1970s" 2 "1980s" 3 "1990s+") plot1opts(lcolor("gs6") mcolor("gs6")) ci1opts(color("gs6")) plot3opts(lcolor("cranberry") mcolor("cranberry")) ci3opts(color("cranberry"))
 
@@ -822,10 +705,12 @@ marginsplot, xdimension(hh_earn_type_t1) bydimension(cohort_det_v2)  byopts(titl
 	xline(0, lcolor(black) lstyle(solid)) ylabel(2 "Male BW" 3 "Female BW")
 
 // margins, dydx(*) post
-// outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(NoCollInt) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+// outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(NoCollInt) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 // Unpaid labor division
 logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & housework_bkt_t!=4, cluster(unique_id) or
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(NoColl2) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
 margins cohort_det_v2#housework_bkt_t
 marginsplot, xtitle("Marital Cohort") ylabel(, angle(0))  ytitle("Predicted Probability of Marital Dissolution") plotregion(fcolor(white)) graphregion(fcolor(white)) title("") legend(region(lcolor(white))) legend(pos(6)) legend(rows(1)) xlabel(1 "1970s" 2 "1980s" 3 "1990s+") plot1opts(lcolor("gs6") mcolor("gs6")) ci1opts(color("gs6")) plot3opts(lcolor("cranberry") mcolor("cranberry")) ci3opts(color("cranberry"))
 
@@ -838,7 +723,7 @@ marginsplot, xdimension(housework_bkt_t) bydimension(cohort_det_v2)  byopts(titl
 	xline(0, lcolor(black) lstyle(solid)) ylabel(2 "Female HW" 3 "Male HW")
 	
 // margins, dydx(*) post
-// outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(NoCollInt HW) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+// outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(NoCollInt HW) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 // Combined division of labor (just AMEs)
 logit dissolve i.dur i.earn_type_hw##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or
@@ -849,6 +734,7 @@ xline(0, lcolor(black) lstyle(solid)) ylabel(2 "Dual: Woman" 3 "Dual: Man" 4 "Ma
 
 // Combined division of labor (just AMEs) - ALT measure
 logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(NoColl3) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3))
 marginsplot, bydimension(cohort_det_v2) recast(scatter) byopts(title("Marital Cohort") rows(1))  horizontal yscale(reverse) xtitle("Predicted Probability of Divorce") ytitle("Combined Division of Labor") ///
@@ -885,6 +771,7 @@ marginsplot, xdimension(ft_t1_wife) bydimension(cohort_det_v2) byopts(title("Mar
 
 // Her share of earnings
 logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or // overall
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(NoColl4) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3))
 marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title("Marital Cohort") rows(1)) horizontal xline(0, lcolor(black) lstyle(solid)) xtitle("Predicted Probability of Divorce") ytitle("Her Share of Earnings") ylabel(none)
@@ -899,6 +786,7 @@ marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title
 
 // Her share of housework
 logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or // overall
+outreg2 using "$results/dissolution_time_trends_ORs.xls", sideway stats(coef pval) eform ctitle(NoColl5) dec(2) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3))
 marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title("Marital Cohort") rows(1)) horizontal xline(0, lcolor(black) lstyle(solid)) xtitle("Predicted Probability of Divorce") ytitle("Her Share of Housework") ylabel(none)
@@ -916,6 +804,255 @@ logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 c.wife_housework_pct_
 
 margins, dydx(female_earn_pct_t1 wife_housework_pct_t) at(cohort_det_v2=(1 2 3))
 marginsplot, bydimension(cohort_det_v2) recast(scatter) aspect(0.9) byopts(title("Marital Cohort") rows(1)) horizontal xline(0, lcolor(black) lstyle(solid)) xtitle("Predicted Probability of Divorce") ytitle("Her Relative Contributions") yscale(reverse) ylabel(1 "Earnings" 2 "Housework") 
+
+********************************************************************************
+**# Actual figures for paper
+********************************************************************************
+
+****************
+* Overall
+****************
+
+// Paid labor division
+logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4, cluster(unique_id) or // overall
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=1) level(90) post
+est store o1a
+
+logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4, cluster(unique_id) or // overall
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=2) level(90) post
+est store o1b
+
+logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4, cluster(unique_id) or // overall
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=3) level(90) post
+est store o1c
+
+// Her share of earnings
+logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or // overall
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=1) level(90) post
+est store o4a
+
+logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or // overall
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=2) level(90) post
+est store o4b
+
+logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or // overall
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=3) level(90) post
+est store o4c
+
+// Unpaid labor division
+logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4, cluster(unique_id) or // overall
+margins, dydx(housework_bkt_t) at(cohort_det_v2=1) level(90) post
+est store o2a
+
+logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4, cluster(unique_id) or // overall
+margins, dydx(housework_bkt_t) at(cohort_det_v2=3) level(90) post
+est store o2b
+
+logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4, cluster(unique_id) or // overall
+margins, dydx(housework_bkt_t) at(cohort_det_v2=3) level(90) post
+est store o2c
+
+// Her share of housework
+logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or // overall
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=1) level(90) post
+est store o5a
+
+logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or // overall
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=2) level(90) post
+est store o5b
+
+logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or // overall
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=3) level(90) post
+est store o5c
+
+// Combined division of labor (just AMEs) - ALT measure
+logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=1) level(90) post
+est store o3a
+
+logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=2) level(90) post
+est store o3b
+
+logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2), cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=3) level(90) post
+est store o3c
+
+// Chart
+// coefplot o1a o1b o1c o2a o2b o2c
+// https://www.statalist.org/forums/forum/general-stata-discussion/general/1724342-list-colors-used-in-color-scheme
+
+coefplot (o1a, nokey) (o4a, nokey lcolor("red*1.2") mcolor("red*1.2") ciopts(color("red*1.2"))) (o2a, nokey lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) ///
+ (o5a, nokey lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) (o3a, nokey lcolor("gs8") mcolor("gs8") ciopts(color("gs8"))), bylabel("1970s")  || ///
+(o1b, nokey) (o4b, nokey lcolor("red*1.2") mcolor("red*1.2") ciopts(color("red*1.2"))) (o2b, nokey  lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) ///
+ (o5b, nokey  lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) (o3b, nokey lcolor("gs8") mcolor("gs8") ciopts(color("gs8"))), bylabel("1980s") || ///
+(o1c, nokey) (o4c, nokey  lcolor("red*1.2") mcolor("red*1.2") ciopts(color("red*1.2"))) (o2c, nokey  lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) ///
+(o5c, nokey lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) (o3c, nokey lcolor("gs8") mcolor("gs8") ciopts(color("gs8"))), bylabel("1990s+") || ///
+, drop(_cons) xline(0, lcolor(black) lstyle(solid)) levels(90) base xtitle(Average Marginal Effects, size(small)) ///
+coeflabels(female_earn_pct_t1 = "Her Share of Earnings" wife_housework_pct_t = "Her Share of Housework") xsize(8) byopts(rows(1)) ///
+headings(1.hh_earn_type_t1= "{bf:Division of Paid Labor}" 1.housework_bkt_t = "{bf:Dvision of Unpaid Labor}" 1.earn_housework_det = "{bf:Combined Division of Labor}")
+
+****************
+* College
+****************
+
+// Paid labor division
+logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=1) level(90) post
+est store c1a
+
+logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=2) level(90) post
+est store c1b
+
+logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=3) level(90) post
+est store c1c
+
+// Her share of earnings
+logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=1) level(90) post
+est store c4a
+
+logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=2) level(90) post
+est store c4b
+
+logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=3) level(90) post
+est store c4c
+
+// Unpaid labor division
+logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=1) level(90) post
+est store c2a
+
+logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=3) level(90) post
+est store c2b
+
+logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=3) level(90) post
+est store c2c
+
+// Her share of housework
+logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=1) level(90) post
+est store c5a
+
+logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=2) level(90) post
+est store c5b
+
+logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=3) level(90) post
+est store c5c
+
+// Combined division of labor (just AMEs) - ALT measure
+logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=1) level(90) post
+est store c3a
+
+logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=2) level(90) post
+est store c3b
+
+logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=3) level(90) post
+est store c3c
+
+// Chart
+
+coefplot (c1a, nokey) (c4a, nokey lcolor("red*1.2") mcolor("red*1.2") ciopts(color("red*1.2"))) (c2a, nokey lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) ///
+ (c5a, nokey lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) (c3a, nokey lcolor("gs8") mcolor("gs8") ciopts(color("gs8"))), bylabel("1970s")  || ///
+(c1b, nokey) (c4b, nokey lcolor("red*1.2") mcolor("red*1.2") ciopts(color("red*1.2"))) (c2b, nokey  lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) ///
+ (c5b, nokey  lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) (c3b, nokey lcolor("gs8") mcolor("gs8") ciopts(color("gs8"))), bylabel("1980s") || ///
+(c1c, nokey) (c4c, nokey  lcolor("red*1.2") mcolor("red*1.2") ciopts(color("red*1.2"))) (c2c, nokey  lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) ///
+(c5c, nokey lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) (c3c, nokey lcolor("gs8") mcolor("gs8") ciopts(color("gs8"))), bylabel("1990s+") || ///
+, drop(_cons) xline(0, lcolor(black) lstyle(solid)) levels(90) base xtitle(Average Marginal Effects, size(small)) ///
+coeflabels(female_earn_pct_t1 = "Her Share of Earnings" wife_housework_pct_t = "Her Share of Housework") xsize(8) byopts(rows(1)) ///
+headings(1.hh_earn_type_t1= "{bf:Division of Paid Labor}" 1.housework_bkt_t = "{bf:Dvision of Unpaid Labor}" 1.earn_housework_det = "{bf:Combined Division of Labor}")
+
+****************
+* No College
+****************
+
+// Paid labor division
+logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=1) level(90) post
+est store n1a
+
+logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=2) level(90) post
+est store n1b
+
+logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=3) level(90) post
+est store n1c
+
+// Her share of earnings
+logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=1) level(90) post
+est store n4a
+
+logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=2) level(90) post
+est store n4b
+
+logit dissolve i.dur c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=3) level(90) post
+est store n4c
+
+// Unpaid labor division
+logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=1) level(90) post
+est store n2a
+
+logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=3) level(90) post
+est store n2b
+
+logit dissolve i.dur i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=3) level(90) post
+est store n2c
+
+// Her share of housework
+logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=1) level(90) post
+est store n5a
+
+logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=2) level(90) post
+est store n5b
+
+logit dissolve i.dur c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=3) level(90) post
+est store n5c
+
+// Combined division of labor (just AMEs) - ALT measure
+logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=1) level(90) post
+est store n3a
+
+logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=2) level(90) post
+est store n3b
+
+logit dissolve i.dur i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=3) level(90) post
+est store n3c
+
+// Chart
+
+coefplot (n1a, nokey) (n4a, nokey lcolor("red*1.2") mcolor("red*1.2") ciopts(color("red*1.2"))) (n2a, nokey lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) ///
+ (n5a, nokey lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) (n3a, nokey lcolor("gs8") mcolor("gs8") ciopts(color("gs8"))), bylabel("1970s")  || ///
+(n1b, nokey) (n4b, nokey lcolor("red*1.2") mcolor("red*1.2") ciopts(color("red*1.2"))) (n2b, nokey  lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) ///
+ (n5b, nokey  lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) (n3b, nokey lcolor("gs8") mcolor("gs8") ciopts(color("gs8"))), bylabel("1980s") || ///
+(n1c, nokey) (n4c, nokey  lcolor("red*1.2") mcolor("red*1.2") ciopts(color("red*1.2"))) (n2c, nokey  lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) ///
+(n5c, nokey lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))) (n3c, nokey lcolor("gs8") mcolor("gs8") ciopts(color("gs8"))), bylabel("1990s+") || ///
+, drop(_cons) xline(0, lcolor(black) lstyle(solid)) levels(90) base xtitle(Average Marginal Effects, size(small)) ///
+coeflabels(female_earn_pct_t1 = "Her Share of Earnings" wife_housework_pct_t = "Her Share of Housework") xsize(8) byopts(rows(1)) ///
+headings(1.hh_earn_type_t1= "{bf:Division of Paid Labor}" 1.housework_bkt_t = "{bf:Dvision of Unpaid Labor}" 1.earn_housework_det = "{bf:Combined Division of Labor}")
 
 ********************************************************************************
 **# * How to export the interaction results?
@@ -1437,6 +1574,144 @@ logit dissolve i.dur i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln if inlist(IN
 est store n1a
 
 mecompare i.hh_earn_type_t1, models(c1a n1a) group(couple_educ_gp)
+
+// then go into actual models of interest
+
+** College-educated
+// 1970-1994
+logit dissolve i.dur i.hh_earn_type_t1 i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(housework_bkt_t hh_earn_type_t1)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll1a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
+
+logit dissolve i.dur i.earn_type_hw earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(earn_type_hw)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll2a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur i.ft_t1_head i.ft_t1_wife i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(ft_t1_head ft_t1_wife housework_bkt_t)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll3a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur female_earn_pct_t1 wife_housework_pct_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1 wife_housework_pct_t)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll4a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// 1995-2014
+logit dissolve i.dur i.hh_earn_type_t1 i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(housework_bkt_t hh_earn_type_t1)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll1b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur i.earn_type_hw earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(earn_type_hw)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll2b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur i.ft_t1_head i.ft_t1_wife i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(ft_t1_head ft_t1_wife housework_bkt_t)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll3b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur female_earn_pct_t1 wife_housework_pct_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1 wife_housework_pct_t)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(Coll4b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+** Non-college-educated
+// 1970-1994
+logit dissolve i.dur i.hh_earn_type_t1 i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t hh_earn_type_t1)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll1a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur i.earn_type_hw earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(earn_type_hw)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll2a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur i.ft_t1_head i.ft_t1_wife i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(ft_t1_head ft_t1_wife housework_bkt_t)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll3a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur female_earn_pct_t1 wife_housework_pct_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1 wife_housework_pct_t)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll4a) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// 1995-2014
+logit dissolve i.dur i.hh_earn_type_t1 i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t hh_earn_type_t1)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll1b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+********************************************************************************
+********************************************************************************
+**# Final analysis for Sociological Science, JMF, and dissertation
+********************************************************************************
+********************************************************************************
+
+logit dissolve i.dur i.earn_type_hw earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(earn_type_hw)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll2b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur i.ft_t1_head i.ft_t1_wife i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(ft_t1_head ft_t1_wife housework_bkt_t)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll3b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur female_earn_pct_t1 wife_housework_pct_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1 wife_housework_pct_t)
+margins, dydx(*) post
+outreg2 using "$results/dissolution_time_trends.xls", sideway stats(coef se pval) ctitle(No Coll4b) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+** Margins
+
+// College-educated
+// 1970-1994
+logit dissolve i.dur i.hh_earn_type_t1 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1)
+margins hh_earn_type_t1
+margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
+
+logit dissolve i.dur i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==1, cluster(unique_id) or
+margins housework_bkt_t
+margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
+
+// 1995-2014
+logit dissolve i.dur i.hh_earn_type_t1 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
+margins hh_earn_type_t1
+margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
+
+logit dissolve i.dur i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==1, cluster(unique_id) or
+margins housework_bkt_t
+margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
+
+local controls "age_mar_wife age_mar_wife_sq age_mar_head age_mar_head_sq i.race_head i.same_race i.either_enrolled i.region cohab_with_wife cohab_with_other pre_marital_birth  i.num_children i.interval i.home_owner"
+
+// Non-college-educated
+// 1970-1994
+logit dissolve i.dur i.hh_earn_type_t1 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1)
+margins hh_earn_type_t1
+margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
+
+logit dissolve i.dur i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1970,1994) & couple_educ_gp==0, cluster(unique_id) or
+margins housework_bkt_t
+margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
+
+// 1995-2014
+logit dissolve i.dur i.hh_earn_type_t1 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
+margins hh_earn_type_t1
+margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
+
+logit dissolve i.dur i.housework_bkt_t earnings_ln $controls if inlist(IN_UNIT,0,1,2) & inrange(rel_start_all,1995,2014) & couple_educ_gp==0, cluster(unique_id) or
+margins housework_bkt_t
+margins, at(knot2=(0(10)20)) at(knot3=(0(10)100))
 
 ********************************************************************************
 **# Robustness: add weights
