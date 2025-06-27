@@ -34,7 +34,7 @@ label values cohort_det_v2 cohort_det_v2
 ********************************************************************************
 * Additional sample restrictions
 ********************************************************************************
-// let's get rid of 2021
+// let's get rid of 2021 - bc a. this analysis was started with just 2019 data and b. covid
 drop if survey_yr==2021
 
 // need to decide - ALL MARRIAGES or just first? - killewald restricts to just first, so does cooke. My validation is MUCH BETTER against those with first marraiges only...
