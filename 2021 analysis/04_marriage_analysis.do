@@ -1581,8 +1581,17 @@ margins, dydx(hh_earn_type_t1)
 */
 
 ********************************************************************************
+********************************************************************************
+********************************************************************************
 **# * Robustness Check: Detailed Education
 ********************************************************************************
+********************************************************************************
+********************************************************************************
+
+********************************************************************************
+* Three cohorts (concerns about sample size)
+********************************************************************************
+
 ************************
 * Neither College
 ************************
@@ -1764,9 +1773,195 @@ outreg2 using "$results/dissolution_time_educ.xls", sideway stats(coef se pval) 
 	//margins, dydx(female_hw_bucket) at(cohort_det_v2=(1 2 3)) post
 	//outreg2 using "$results/dissolution_time_educ.xls", sideway stats(coef se pval) ctitle(Both8) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
-	
 ********************************************************************************
-* Running into sample size challenges, let's try two cohorts instead of three
+* Wald tests for detailed education, three cohorts
+********************************************************************************
+// going to attempt putexcel
+putexcel set "$results/Detailed_Education_Time_tests", replace
+putexcel B1:D1 = "Neither College", merge border(bottom)
+putexcel E1:G1 = "His College", merge border(bottom)
+putexcel H1:J1 = "Her College", merge border(bottom)
+putexcel K1:M1 = "Both College", merge border(bottom)
+putexcel N1:P1 = "At Least One College", merge border(bottom)
+putexcel B2 = ("1970s") C2 = ("1980s") D2 = ("1990s") E2 = ("1970s") F2 = ("1980s") G2 = ("1990s") H2 = ("1970s") I2 = ("1980s") J2 = ("1990s"), border(bottom)
+putexcel K2 = ("1970s") L2 = ("1980s") M2 = ("1990s") N2 = ("1970s") O2 = ("1980s") P2 = ("1990s"), border(bottom)
+
+putexcel A3 = "Paid Labor"
+putexcel A4 = "Male BW"
+putexcel A5 = "Female BW"
+putexcel A6 = "Her Earnings Share"
+putexcel A7 = "Unpaid Labor"
+putexcel A8 = "Female HW"
+putexcel A9 = "Male HW"
+putexcel A10 = "Her HW Share"
+putexcel A11 = "Combined DoL"
+putexcel A12 = "Second Shift"
+putexcel A13 = "Traditional"
+putexcel A14 = "Counter-trad"
+putexcel A15 = "All other female BW"
+putexcel A16 = "Underwork"
+putexcel A17 = "Other"
+
+local 70s_col "B E H K N"
+local 80s_col "C F I L O"
+local 90s_col "D G J M P"
+
+// this isn't going to work for all because not all are estimating...
+// add captures for now?
+
+forvalues e=1/4{
+	
+	local c70s: word `e' of `70s_col'
+	local c80s: word `e' of `80s_col'
+	local c90s: word `e' of `90s_col'
+
+// Paid labor division
+capture logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+capture margins, dydx(hh_earn_type_t1) at(cohort_det_v2=(1 2 3)) post
+capture mlincom 1-2, detail // male BW cohort 1 - cohort 2 // okay, if there is an error, it still estimates this, but it is not on what I want...so I need to manually replace
+capture putexcel `c70s'4 = `r(p)'
+capture mlincom 2-3, detail // male BW cohort 2 - cohort 3
+capture putexcel `c80s'4 = `r(p)'
+capture mlincom 1-3, detail // male BW cohort 1 - cohort 3
+capture putexcel `c90s'4 = `r(p)'
+capture mlincom 4-5, detail // female BW cohort 1 - 2
+capture putexcel `c70s'5 = `r(p)'
+capture mlincom 5-6, detail // female BW cohort 2 - 3
+capture putexcel `c80s'5 = `r(p)'
+capture mlincom 4-6, detail // female BW cohort 1 - 3
+capture putexcel `c90s'5 = `r(p)'
+
+// Her share of earnings
+capture logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+capture margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3)) post
+capture mlincom 1-2, detail // cohort 1 - 2
+capture putexcel `c70s'6 = `r(p)'
+capture mlincom 2-3, detail // cohort 2 - 3
+capture putexcel `c80s'6 = `r(p)'
+capture mlincom 1-3, detail // cohort 1 - 3
+capture putexcel `c90s'6 = `r(p)'
+
+// Unpaid labor division
+capture logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+capture margins, dydx(housework_bkt_t) at(cohort_det_v2=(1 2 3)) post
+capture mlincom 1-2, detail // female HW cohort 1 - cohort 2
+capture putexcel `c70s'8 = `r(p)'
+capture mlincom 2-3, detail // female HW cohort 2 - cohort 3
+capture putexcel `c80s'8 = `r(p)'
+capture mlincom 1-3, detail // female HW cohort 1 - cohort 3
+capture putexcel `c90s'8 = `r(p)'
+capture mlincom 4-5, detail // male HW cohort 1 - 2
+capture putexcel `c70s'9 = `r(p)'
+capture mlincom 5-6, detail // male HW cohort 2 - 3
+capture putexcel `c80s'9 = `r(p)'
+capture mlincom 4-6, detail // male HW cohort 1 - 3
+capture putexcel `c90s'9 = `r(p)'
+
+// Her share of housework
+capture logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+capture margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3)) post
+capture mlincom 1-2, detail // cohort 1 - 2
+capture putexcel `c70s'10 = `r(p)'
+capture mlincom 2-3, detail // cohort 2 - 3
+capture putexcel `c80s'10 = `r(p)'
+capture mlincom 1-3, detail // cohort 1 - 3
+capture putexcel `c90s'10 = `r(p)'
+
+// Combined division of labor (just AMEs) - ALT measure
+capture logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+capture margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3)) post
+capture mlincom 1-2, detail // second shift cohort 1 - cohort 2
+capture putexcel `c70s'12 = `r(p)'
+capture mlincom 2-3, detail // SS cohort 2 - cohort 3
+capture putexcel `c80s'12 = `r(p)'
+capture mlincom 1-3, detail // SS cohort 1 - cohort 3
+capture putexcel `c90s'12 = `r(p)'
+capture mlincom 4-5, detail // trad cohort 1 - 2
+capture putexcel `c70s'13 = `r(p)'
+capture mlincom 5-6, detail // trad cohort 2 - 3
+capture putexcel `c80s'13 = `r(p)'
+capture mlincom 4-6, detail // trad cohort 1 - 3
+capture putexcel `c90s'13 = `r(p)'
+capture mlincom 7-8, detail // counter-trad 1 - 2
+capture putexcel `c70s'14 = `r(p)'
+capture mlincom 8-9, detail // counter-trad 2 - 3
+capture putexcel `c80s'14 = `r(p)'
+capture mlincom 7-9, detail // counter-trad 1 - 3
+capture putexcel `c90s'14 = `r(p)'
+capture mlincom 10-11, detail // female BW 1 - 2
+capture putexcel `c70s'15 = `r(p)'
+capture mlincom 11-12, detail // female BW 2 - 3
+capture putexcel `c80s'15 = `r(p)'
+capture mlincom 10-12, detail // female BW 1 - 3
+capture putexcel `c90s'15 = `r(p)'
+capture mlincom 13-14, detail // underwork 1 - 2
+capture putexcel `c70s'16 = `r(p)'
+capture mlincom 14-15, detail // underwork 2 - 3
+capture putexcel `c80s'16 = `r(p)'
+capture mlincom 13-15, detail // underwork 1 - 3
+capture putexcel `c90s'16 = `r(p)'
+capture mlincom 16-17, detail // other 1 - 2
+capture putexcel `c70s'17 = `r(p)'
+capture mlincom 17-18, detail // other 2 - 3
+capture putexcel `c80s'17 = `r(p)'
+capture mlincom 16-18, detail // other 1 - 3
+capture putexcel `c90s'17 = `r(p)'
+
+}
+
+// These are the ones I have to do specially because they aren't estimating properly
+// His College Paid Labor
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==2 & no_labor==0 & any_missing==0 & hh_earn_type_t1!=3, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=(1 2 3)) post
+
+mlincom 1-2, detail // male BW cohort 1 - cohort 2
+mlincom 2-3, detail // male BW cohort 2 - cohort 3
+mlincom 1-3, detail // male BW cohort 1 - cohort 3
+
+// Let's validate that this is correct: Her share of earnings
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==2 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3)) post
+mlincom 1-2, detail // cohort 1 - 2
+mlincom 2-3, detail // cohort 2 - 3
+mlincom 1-3, detail // cohort 1 - 3
+
+// His College Combined
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==2 & no_labor==0 & any_missing==0 & !inlist(earn_housework_det,4,5), cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3)) post
+mlincom 1-2, detail // second shift cohort 1 - cohort 2
+mlincom 2-3, detail // SS cohort 2 - cohort 3
+mlincom 1-3, detail // SS cohort 1 - cohort 3
+mlincom 4-5, detail // trad cohort 1 - 2
+mlincom 5-6, detail // trad cohort 2 - 3
+mlincom 4-6, detail // trad cohort 1 - 3
+mlincom 7-8, detail // underwork (Since 4 and 5 didn't estimate)
+mlincom 8-9, detail // underwork (Since 4 and 5 didn't estimate)
+mlincom 7-9, detail // underwork (Since 4 and 5 didn't estimate)
+mlincom 10-11, detail // other 1 - 2
+mlincom 11-12, detail // other 2 - 3
+mlincom 10-12, detail // other 1 - 3
+
+// Both College Combined
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==4 & no_labor==0 & any_missing==0 & earn_housework_det!=4, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3)) post
+mlincom 1-2, detail // second shift cohort 1 - cohort 2
+mlincom 2-3, detail // SS cohort 2 - cohort 3
+mlincom 1-3, detail // SS cohort 1 - cohort 3
+mlincom 4-5, detail // trad cohort 1 - 2
+mlincom 5-6, detail // trad cohort 2 - 3
+mlincom 4-6, detail // trad cohort 1 - 3
+mlincom 7-8, detail // female BW 1 - 2
+mlincom 8-9, detail // female BW 2 - 3
+mlincom 7-9, detail // female BW 1 - 3
+mlincom 10-11, detail // underwork 1 - 2
+mlincom 11-12, detail // underwork 2 - 3
+mlincom 10-12, detail // underwork 1 - 3
+mlincom 13-14, detail // other 1 - 2
+mlincom 14-15, detail // other 2 - 3
+mlincom 13-15, detail // other 1 - 3
+
+********************************************************************************
+**# Running into sample size challenges, let's try two cohorts instead of three
 * First, figure out what cutoff is meaningful based on existing groups
 ********************************************************************************
 // 1985 as cutoff (splits in middle)
@@ -1856,10 +2051,8 @@ margins, dydx(earn_housework_det) at(cohort_test_b=(1 2)) post
 outreg2 using "$results/dissolution_educ_test.xls", sideway stats(coef se pval) ctitle(NC B 3) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 ********************************************************************************
-**# Robustness: Detailed Education
-* Okay, Cohort B (1990 as cutoff) COULD work, let's try
+**# Okay, Cohort B (1990 as cutoff) COULD work, let's try
 ********************************************************************************
-
 ************************
 * Neither College
 ************************
@@ -1980,6 +2173,377 @@ margins, dydx(female_earn_pct_t1) at(cohort_test_b=(1 2)) post
 // Her share of housework
 logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(wife_housework_pct_t) at(cohort_test_b=(1 2)) post
+
+************************
+// going to attempt putexcel
+************************
+putexcel set "$results/Detailed_Education_Time_cross-cohort", replace
+putexcel B1 = "Neither College"
+putexcel C1 = "His College"
+putexcel D1 = "Her College"
+putexcel E1 = "Both College"
+
+putexcel A2 = "Paid Labor"
+putexcel A3 = "Male BW"
+putexcel A4 = "Female BW"
+putexcel A5 = "Her Earnings Share"
+putexcel A6 = "Unpaid Labor"
+putexcel A7 = "Female HW"
+putexcel A8 = "Male HW"
+putexcel A9 = "Her HW Share"
+putexcel A10 = "Combined DoL"
+putexcel A11 = "Second Shift"
+putexcel A12 = "Traditional"
+putexcel A13 = "Counter-trad"
+putexcel A14 = "All other female BW"
+putexcel A15 = "Underwork"
+putexcel A16 = "Other"
+
+local col_list "B C D E"
+
+forvalues e=1/4{
+	
+	local col: word `e' of `col_list'
+	
+// Paid labor division
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_test_b=(1 2)) post
+mlincom 1-2, detail // male BW cohort 1 - cohort 2
+putexcel `col'3 = `r(p)'
+mlincom 3-4, detail // female BW
+putexcel `col'4 = `r(p)'
+
+// Her share of earnings
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_test_b=(1 2)) post
+mlincom 1-2, detail // cohort 1 - 2
+putexcel `col'5 = `r(p)'
+
+// Unpaid labor division
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_test_b=(1 2)) post
+mlincom 1-2, detail // female HW cohort 1 - cohort 2
+putexcel `col'7 = `r(p)'
+mlincom 3-4, detail // male HW
+putexcel `col'8 = `r(p)'
+
+// Her share of housework
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_test_b=(1 2)) post
+mlincom 1-2, detail // cohort 1 - 2
+putexcel `col'9 = `r(p)'
+
+// Combined division of labor (just AMEs) - ALT measure
+capture logit dissolve i.dur_gp i.earn_housework_det##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+capture margins, dydx(earn_housework_det) at(cohort_test_b=(1 2)) post
+mlincom 1-2, detail // second shift cohort 1 - cohort 2
+putexcel `col'11 = `r(p)'
+mlincom 3-4, detail // trad cohort 1 - 2
+putexcel `col'12 = `r(p)'
+mlincom 5-6, detail // counter-trad
+putexcel `col'13 = `r(p)'
+mlincom 7-8, detail // female BW
+putexcel `col'14 = `r(p)'
+mlincom 9-10, detail // underwork
+putexcel `col'15 = `r(p)'
+capture mlincom 11-12, detail // other
+capture putexcel `col'16 = `r(p)'
+
+}
+
+// The him college combined DoL didn't work
+// okay, I think it worked, but the rows are off bc counter-trad couldn't estimate
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==2 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_test_b=(1 2)) post
+mlincom 1-2, detail // second shift cohort 1 - cohort 2
+mlincom 3-4, detail // trad cohort 1 - 2
+mlincom 5-6, detail // female BW
+mlincom 7-8, detail // underwork
+mlincom 9-10, detail // other
+
+// At least one college (don't have these wald tests)
+// Paid labor division
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_test_b=(1 2)) post
+mlincom 1-2, detail // male BW cohort 1 - cohort 2
+mlincom 3-4, detail // female BW
+
+// Her share of earnings
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_test_b=(1 2)) post
+mlincom 1-2, detail // cohort 1 - 2
+
+// Unpaid labor division
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_test_b=(1 2)) post
+mlincom 1-2, detail // female HW cohort 1 - cohort 2
+mlincom 3-4, detail // male HW
+
+// Her share of housework
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_test_b=(1 2)) post
+mlincom 1-2, detail // cohort 1 - 2
+
+// Combined division of labor (just AMEs) - ALT measure
+capture logit dissolve i.dur_gp i.earn_housework_det##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_test_b=(1 2)) post
+mlincom 1-2, detail // second shift cohort 1 - cohort 2
+mlincom 3-4, detail // trad cohort 1 - 2
+mlincom 5-6, detail // counter-trad
+mlincom 7-8, detail // female BW
+mlincom 9-10, detail // underwork
+mlincom 11-12, detail // other
+
+********************************************************
+* Attempting some figures just to visualize differences
+********************************************************
+// Can I do this to get the stored estimates?
+forvalues e=1/4{
+	
+// Paid labor division
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_test_b=1) level(90) post
+est store e`e'_pl1
+
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_test_b=2) level(90) post
+est store e`e'_pl2
+
+// Her share of earnings
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_test_b=1) level(90) post
+est store e`e'_e1
+
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_test_b=2) level(90) post
+est store e`e'_e2
+
+// Unpaid labor division
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_test_b=1) level(90) post
+est store e`e'_ul1
+
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_test_b=2) level(90) post
+est store e`e'_ul2
+
+// Her share of housework
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_test_b=1) level(90) post
+est store e`e'_hw1
+
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_test_b=2) level(90) post
+est store e`e'_hw2
+
+// Combined division of labor (just AMEs) - ALT measure
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_test_b=1) level(90) post
+est store e`e'_dol1
+
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_test_b earnings_ln $controls if inlist(IN_UNIT,0,1,2) & educ_type==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_test_b=2) level(90) post
+est store e`e'_dol2
+
+}
+
+// Chart: Paid Labor, across groups
+coefplot 	(e1_pl1, label("1970-1989")) (e1_pl2, label("1990s+")) ///
+			(e1_e1, nokey lcolor("red*1.2") mcolor("red*1.2") ciopts(color("red*1.2"))) ///
+			(e1_e2, nokey lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))), bylabel("Neither College") || ///
+			e2_pl1 e2_pl2 e2_e1 e2_e2, bylabel("His College") || ///
+			e3_pl1 e3_pl2 e3_e1 e3_e2, bylabel("Her College") || ///
+			e4_pl1 e4_pl2 e4_e1 e4_e2, bylabel("Both College") || ///
+, drop(_cons) xline(0, lcolor(black) lstyle(solid)) levels(90) base xtitle(Average Marginal Effects, size(small)) ///
+coeflabels(female_earn_pct_t1 = "Her Share of Earnings") legend(rows(1))  // byopts(rows(1))
+
+// Chart: Unpaid Labor, across groups
+coefplot 	(e1_ul1, label("1970-1989")) (e1_ul2, label("1990s+")) ///
+			(e1_hw1, nokey lcolor("red*1.2") mcolor("red*1.2") ciopts(color("red*1.2"))) ///
+			(e1_hw2, nokey lcolor("eltblue") mcolor("eltblue") ciopts(color("eltblue"))), bylabel("Neither College") || ///
+			e2_ul1 e2_ul2 e2_hw1 e2_hw2, bylabel("His College") || ///
+			e3_ul1 e3_ul2 e3_hw1 e3_hw2, bylabel("Her College") || ///
+			e4_ul1 e4_ul2 e4_hw1 e4_hw2, bylabel("Both College") || ///
+, drop(_cons) xline(0, lcolor(black) lstyle(solid)) levels(90) base xtitle(Average Marginal Effects, size(small)) ///
+coeflabels(wife_housework_pct_t = "Her Share of Housework") legend(rows(1))  // byopts(rows(1))
+
+// Chart: Combined Division of Labor, across groups
+coefplot 	(e1_dol1, label("1970-1989")) (e1_dol2, label("1990s+")), bylabel("Neither College") || ///
+			e2_dol1 e2_dol2, bylabel("His College") || ///
+			e3_dol1 e3_dol2, bylabel("Her College") || ///
+			e4_dol1 e4_dol2, bylabel("Both College") || ///
+, drop(_cons) xline(0, lcolor(black) lstyle(solid)) levels(90) base xtitle(Average Marginal Effects, size(small)) ///
+legend(rows(1))  // byopts(rows(1))
+
+
+********************************************************************************
+********************************************************************************
+********************************************************************************
+**# * Other robustness checks (model specification)
+********************************************************************************
+********************************************************************************
+********************************************************************************
+// interaction of paid and unpaid labor instead of my created variables (using my created variable that is technically interaction but without needing a three-way interaction in models...)
+* Overall
+logit dissolve i.dur_gp i.earn_type_hw##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(earn_type_hw) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Overall1) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
+
+* College
+logit dissolve i.dur_gp i.earn_type_hw##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(earn_type_hw) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Coll1) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+* No College
+logit dissolve i.dur_gp i.earn_type_hw##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(earn_type_hw) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(NC1) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// what happens if I don't include survey interval control
+local c_test "c.age_mar_wife c.age_mar_wife_sq c.age_mar_head c.age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region i.cohab_with_wife i.cohab_with_other i.pre_marital_birth  i.num_children i.home_owner" // i.interval 
+
+* Overall
+// Paid labor division
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Overall2A) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Her share of earnings
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Overall2B) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Unpaid labor division
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Overall2C) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+	
+// Her share of housework
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or 
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Overall2D) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Combined division of labor (just AMEs) - ALT measure
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Overall2E) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+* College
+// Paid labor division
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & no_labor==0 & any_missing==0 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Coll2A) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Her share of earnings
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Coll2B) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Unpaid labor division
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & no_labor==0 & any_missing==0 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Coll2C) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+	
+// Her share of housework
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==1, cluster(unique_id) or 
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Coll2D) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Combined division of labor (just AMEs) - ALT measure
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Coll2E) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+* No College
+// Paid labor division
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & no_labor==0 & any_missing==0 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(NC2A) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Her share of earnings
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(NC2B) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Unpaid labor division
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & no_labor==0 & any_missing==0 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(NC2C) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+	
+// Her share of housework
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==0, cluster(unique_id) or 
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(NC2D) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Combined division of labor (just AMEs) - ALT measure
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln `c_test' if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(NC2E) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// what happens if paid and unpaid labor are in same models
+* Categorical
+// Overall
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Overall3A) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Overall3B) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// No College
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Coll3A) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Coll3B) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// No College
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(hh_earn_type_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(NC3A) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(housework_bkt_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(NC3B) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+* Continuous
+// Overall
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Overall4A) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Overall4B) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// No College
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Coll4A) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==1, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(Coll4B) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// No College
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(NC4A) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0 & couple_educ_gp==0, cluster(unique_id) or
+margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(NC4B) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+********************************************************************************
+********************************************************************************
+********************************************************************************
+**# Previous submissions / versions of this paper
+********************************************************************************
+********************************************************************************
+********************************************************************************
 
 ********************************************************************************
 **# How to test education differences in a given cohort?
@@ -2418,7 +2982,7 @@ logit dissolve i.dur knot1 knot2 knot3 $controls if inlist(IN_UNIT,0,1,2) & coup
 **********************************OLD ANALYSES**********************************
 ********** (Nothing updated below this point because no longer using) **********
 ********************************************************************************
-
+/*
 
 ********************************************************************************
 **# Robustness: other time cutoffs: 1990
@@ -6995,3 +7559,4 @@ logit dissolve_lag dur i.config TAXABLE_HEAD_WIFE_ if inlist(IN_UNIT,1,2) & coho
 logit dissolve_lag dur i.config TAXABLE_HEAD_WIFE_ if inlist(IN_UNIT,1,2) & cohort==3 & couple_educ_gp==1, or
 */
 
+*/
