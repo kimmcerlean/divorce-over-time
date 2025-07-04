@@ -454,8 +454,9 @@ browse unique_id survey_yr rel_start_all dissolve rel_end_all last_survey_yr yr_
 // restore
 
 **# Analysis starts
-global controls "c.age_mar_wife c.age_mar_wife_sq c.age_mar_head c.age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region i.cohab_with_wife i.cohab_with_other i.pre_marital_birth  i.num_children i.interval i.home_owner"
-// global controls "age_mar_wife age_mar_wife_sq age_mar_head age_mar_head_sq i.raceth_head i.couple_joint_religion i.same_race i.either_enrolled i.region cohab_with_wife cohab_with_other pre_marital_birth  i.num_children i.interval i.home_owner"
+* global controls "c.age_mar_wife c.age_mar_wife_sq c.age_mar_head c.age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region i.cohab_with_wife i.cohab_with_other i.pre_marital_birth  i.num_children i.interval i.home_owner"
+global controls "c.age_mar_wife c.age_mar_wife_sq c.age_mar_head c.age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region i.cohab_with_wife i.cohab_with_other i.pre_marital_birth  i.num_children i.interval i.home_owner i.educ_type"
+// DNU // global controls "age_mar_wife age_mar_wife_sq age_mar_head age_mar_head_sq i.raceth_head i.couple_joint_religion i.same_race i.either_enrolled i.region cohab_with_wife cohab_with_other pre_marital_birth  i.num_children i.interval i.home_owner"
 
 set scheme cleanplots
 graph query colorstyle
@@ -474,7 +475,9 @@ unique unique_id if inlist(IN_UNIT,0,1,2) & inlist(cohort,0,1) & no_labor==0 & a
 unique unique_id if inlist(IN_UNIT,0,1,2) & inlist(cohort,0,1) & dissolve==1 // divorces analytical sample
 
 // FIGURE 1: Show changes in divorce rates over time, descriptively
-logit dissolve i.dur i.couple_educ_gp##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+local controls "c.age_mar_wife c.age_mar_wife_sq c.age_mar_head c.age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region i.cohab_with_wife i.cohab_with_other i.pre_marital_birth  i.num_children i.interval i.home_owner"
+
+logit dissolve i.dur_gp i.couple_educ_gp##i.cohort_det_v2 earnings_ln `controls' if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins cohort_det_v2#couple_educ_gp
 marginsplot, xtitle("Marital Cohort") xlabel(1 "1970s" 2 "1980s" 3 "1990s+")  ytitle("Predicted Probability of Marital Dissolution") plotregion(fcolor(white)) graphregion(fcolor(white)) title("") legend(region(lcolor(white))) legend(pos(6)) legend(rows(1)) // ylabel(0(.01).06, angle(0)) xlabel(1 "1970s" 2 "1980s" 3 "1990s+", angle(45))
 
@@ -1287,223 +1290,270 @@ margins cohort#hh_earn_type_t1
 * Just results I decided to use from above
 ********************************************************************************
 
+// going to attempt putexcel
+putexcel set "$results/Education_Time_tests_MAINRESULTS", replace
+putexcel B1:D1 = "Total Sample", merge border(bottom)
+putexcel E1:G1 = "Neither College", merge border(bottom)
+putexcel H1:J1 = "At Least One College", merge border(bottom)
+putexcel B2 = ("1970s") C2 = ("1980s") D2 = ("1990s") E2 = ("1970s") F2 = ("1980s") G2 = ("1990s") H2 = ("1970s") I2 = ("1980s") J2 = ("1990s"), border(bottom)
+
+putexcel A3 = "Paid Labor"
+putexcel A4 = "Male BW"
+putexcel A5 = "Female BW"
+putexcel A6 = "Her Earnings Share"
+putexcel A7 = "Unpaid Labor"
+putexcel A8 = "Female HW"
+putexcel A9 = "Male HW"
+putexcel A10 = "Her HW Share"
+putexcel A11 = "Combined DoL"
+putexcel A12 = "Second Shift"
+putexcel A13 = "Traditional"
+putexcel A14 = "Counter-trad"
+putexcel A15 = "All other female BW"
+putexcel A16 = "Underwork"
+putexcel A17 = "Other"
+putexcel A18 = "FT Employment Status"
+putexcel A19 = "His"
+putexcel A20 = "Hers"
+
 ****************
-* Overall
+** Overall
 ****************
-// https://www.statalist.org/forums/forum/general-stata-discussion/general/1382166-interaction-in-logistic-regression-differences-between-over-and-at-using-margins
-// okay, very smart people say AT is preferred instead of OVER - better adjusts for other variables in model
 
 // Paid labor division
-logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & no_labor==0 & any_missing==0, cluster(unique_id) or // overall
-// margins, dydx(hh_earn_type_t1) over(cohort_det_v2)
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(hh_earn_type_t1) at(cohort_det_v2=(1 2 3)) post
 mlincom 1-2, detail // male BW cohort 1 - cohort 2
+putexcel B4 = `r(p)'
 mlincom 2-3, detail // male BW cohort 2 - cohort 3
-mlincom 1-3, detail // male BW cohort 1 - cohort 3 // okay so this change is actually NOT significant, even though sig has changed across cohorts
+putexcel C4 = `r(p)'
+mlincom 1-3, detail // male BW cohort 1 - cohort 3
+putexcel D4 = `r(p)'
 mlincom 4-5, detail // female BW cohort 1 - 2
+putexcel B5 = `r(p)'
 mlincom 5-6, detail // female BW cohort 2 - 3
+putexcel C5 = `r(p)'
 mlincom 4-6, detail // female BW cohort 1 - 3
-
-mlincom (1-3)-(4-6), detail // this is, is male BW change larger than female BW change? (maybe?)
+putexcel D5 = `r(p)'
 
 // Her share of earnings
-logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or // overall
-// margins, dydx(female_earn_pct_t1) over(cohort_det_v2)
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3)) post
-mlincom 1-2, detail // cohort 1 - 2 - don't expect to be sig
-mlincom 2-3, detail // cohort 2 - 3 - marginally sig
-mlincom 1-3, detail // cohort 1 - 3 - marginally sig
+mlincom 1-2, detail // cohort 1 - 2
+putexcel B6 = `r(p)'
+mlincom 2-3, detail // cohort 2 - 3
+putexcel C6 = `r(p)'
+mlincom 1-3, detail // cohort 1 - 3
+putexcel D6 = `r(p)'
 
 // Unpaid labor division
-logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & no_labor==0 & any_missing==0, cluster(unique_id) or
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(housework_bkt_t) at(cohort_det_v2=(1 2 3)) post
 mlincom 1-2, detail // female HW cohort 1 - cohort 2
+putexcel B8 = `r(p)'
 mlincom 2-3, detail // female HW cohort 2 - cohort 3
+putexcel C8 = `r(p)'
 mlincom 1-3, detail // female HW cohort 1 - cohort 3
+putexcel D8 = `r(p)'
 mlincom 4-5, detail // male HW cohort 1 - 2
+putexcel B9 = `r(p)'
 mlincom 5-6, detail // male HW cohort 2 - 3
+putexcel C9 = `r(p)'
 mlincom 4-6, detail // male HW cohort 1 - 3
+putexcel D9 = `r(p)'
 
 // Her share of housework
-logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or // overall
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3)) post
 mlincom 1-2, detail // cohort 1 - 2
+putexcel B10 = `r(p)'
 mlincom 2-3, detail // cohort 2 - 3
+putexcel C10 = `r(p)'
 mlincom 1-3, detail // cohort 1 - 3
+putexcel D10 = `r(p)'
 
-// Combined DoL
+// Combined division of labor (just AMEs) - ALT measure
 logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3)) post
 mlincom 1-2, detail // second shift cohort 1 - cohort 2
+putexcel B12 = `r(p)'
 mlincom 2-3, detail // SS cohort 2 - cohort 3
+putexcel C12 = `r(p)'
 mlincom 1-3, detail // SS cohort 1 - cohort 3
+putexcel D12 = `r(p)'
 mlincom 4-5, detail // trad cohort 1 - 2
+putexcel B13 = `r(p)'
 mlincom 5-6, detail // trad cohort 2 - 3
+putexcel C13 = `r(p)'
 mlincom 4-6, detail // trad cohort 1 - 3
+putexcel D13 = `r(p)'
 mlincom 7-8, detail // counter-trad 1 - 2
+putexcel B14 = `r(p)'
 mlincom 8-9, detail // counter-trad 2 - 3
+putexcel C14 = `r(p)'
 mlincom 7-9, detail // counter-trad 1 - 3
+putexcel D14 = `r(p)'
 mlincom 10-11, detail // female BW 1 - 2
+putexcel B15 = `r(p)'
 mlincom 11-12, detail // female BW 2 - 3
+putexcel C15 = `r(p)'
 mlincom 10-12, detail // female BW 1 - 3
+putexcel D15 = `r(p)'
 mlincom 13-14, detail // underwork 1 - 2
+putexcel B16 = `r(p)'
 mlincom 14-15, detail // underwork 2 - 3
+putexcel C16 = `r(p)'
 mlincom 13-15, detail // underwork 1 - 3
+putexcel D16 = `r(p)'
 mlincom 16-17, detail // other 1 - 2
+putexcel B17 = `r(p)'
 mlincom 17-18, detail // other 2 - 3
+putexcel C17 = `r(p)'
 mlincom 16-18, detail // other 1 - 3
+putexcel D17 = `r(p)'
 
 // Combined FT employment
 logit dissolve i.dur_gp i.ft_t1_head##i.cohort_det_v2 i.ft_t1_wife##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(ft_t1_head ft_t1_wife) at(cohort_det_v2=(1 2 3)) post
 mlincom 1-2, detail // his cohort 1 - cohort 2
+putexcel B19 = `r(p)'
 mlincom 2-3, detail // his cohort 2 - cohort 3
+putexcel C19 = `r(p)'
 mlincom 1-3, detail // his cohort 1 - cohort 3
+putexcel D19 = `r(p)'
 mlincom 4-5, detail // hers cohort 1 - 2
+putexcel B20 = `r(p)'
 mlincom 5-6, detail // hers cohort 2 - 3
+putexcel C20 = `r(p)'
 mlincom 4-6, detail // hers cohort 1 - 3
+putexcel D20 = `r(p)'
 
 ****************
-* College
+* By Education
 ****************
+
+capture gen couple_educ_rec = couple_educ_gp + 1 // need to be 1 and 2
+
+local 70s_col "E H"
+local 80s_col "F I"
+local 90s_col "G J"
+
+
+forvalues e=1/2{
+	
+	local c70s: word `e' of `70s_col'
+	local c80s: word `e' of `80s_col'
+	local c90s: word `e' of `90s_col'
+
 // Paid labor division
-logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_rec==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(hh_earn_type_t1) at(cohort_det_v2=(1 2 3)) post
-mlincom 1-2, detail // male BW cohort 1 - cohort 2
+mlincom 1-2, detail // male BW cohort 1 - cohort 2 // okay, if there is an error, it still estimates this, but it is not on what I want...so I need to manually replace
+putexcel `c70s'4 = `r(p)'
 mlincom 2-3, detail // male BW cohort 2 - cohort 3
+putexcel `c80s'4 = `r(p)'
 mlincom 1-3, detail // male BW cohort 1 - cohort 3
+putexcel `c90s'4 = `r(p)'
 mlincom 4-5, detail // female BW cohort 1 - 2
+putexcel `c70s'5 = `r(p)'
 mlincom 5-6, detail // female BW cohort 2 - 3
+putexcel `c80s'5 = `r(p)'
 mlincom 4-6, detail // female BW cohort 1 - 3
-
-mlincom (1-3)-(4-6), detail // this is, is male BW change larger than female BW change? (maybe?)
+putexcel `c90s'5 = `r(p)'
 
 // Her share of earnings
-logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_rec==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3)) post
 mlincom 1-2, detail // cohort 1 - 2
+putexcel `c70s'6 = `r(p)'
 mlincom 2-3, detail // cohort 2 - 3
+putexcel `c80s'6 = `r(p)'
 mlincom 1-3, detail // cohort 1 - 3
+putexcel `c90s'6 = `r(p)'
 
 // Unpaid labor division
-logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_rec==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(housework_bkt_t) at(cohort_det_v2=(1 2 3)) post
 mlincom 1-2, detail // female HW cohort 1 - cohort 2
+putexcel `c70s'8 = `r(p)'
 mlincom 2-3, detail // female HW cohort 2 - cohort 3
+putexcel `c80s'8 = `r(p)'
 mlincom 1-3, detail // female HW cohort 1 - cohort 3
+putexcel `c90s'8 = `r(p)'
 mlincom 4-5, detail // male HW cohort 1 - 2
+putexcel `c70s'9 = `r(p)'
 mlincom 5-6, detail // male HW cohort 2 - 3
+putexcel `c80s'9 = `r(p)'
 mlincom 4-6, detail // male HW cohort 1 - 3
+putexcel `c90s'9 = `r(p)'
 
 // Her share of housework
-logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or 
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_rec==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3)) post
 mlincom 1-2, detail // cohort 1 - 2
+putexcel `c70s'10 = `r(p)'
 mlincom 2-3, detail // cohort 2 - 3
+putexcel `c80s'10 = `r(p)'
 mlincom 1-3, detail // cohort 1 - 3
+putexcel `c90s'10 = `r(p)'
 
-// Combined DoL
-logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+// Combined division of labor (just AMEs) - ALT measure
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_rec==`e' & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3)) post
 mlincom 1-2, detail // second shift cohort 1 - cohort 2
+putexcel `c70s'12 = `r(p)'
 mlincom 2-3, detail // SS cohort 2 - cohort 3
+putexcel `c80s'12 = `r(p)'
 mlincom 1-3, detail // SS cohort 1 - cohort 3
+putexcel `c90s'12 = `r(p)'
 mlincom 4-5, detail // trad cohort 1 - 2
+putexcel `c70s'13 = `r(p)'
 mlincom 5-6, detail // trad cohort 2 - 3
+putexcel `c80s'13 = `r(p)'
 mlincom 4-6, detail // trad cohort 1 - 3
+putexcel `c90s'13 = `r(p)'
 mlincom 7-8, detail // counter-trad 1 - 2
+putexcel `c70s'14 = `r(p)'
 mlincom 8-9, detail // counter-trad 2 - 3
+putexcel `c80s'14 = `r(p)'
 mlincom 7-9, detail // counter-trad 1 - 3
+putexcel `c90s'14 = `r(p)'
 mlincom 10-11, detail // female BW 1 - 2
+putexcel `c70s'15 = `r(p)'
 mlincom 11-12, detail // female BW 2 - 3
+putexcel `c80s'15 = `r(p)'
 mlincom 10-12, detail // female BW 1 - 3
+putexcel `c90s'15 = `r(p)'
 mlincom 13-14, detail // underwork 1 - 2
+putexcel `c70s'16 = `r(p)'
 mlincom 14-15, detail // underwork 2 - 3
+putexcel `c80s'16 = `r(p)'
 mlincom 13-15, detail // underwork 1 - 3
+putexcel `c90s'16 = `r(p)'
 mlincom 16-17, detail // other 1 - 2
+putexcel `c70s'17 = `r(p)'
 mlincom 17-18, detail // other 2 - 3
+putexcel `c80s'17 = `r(p)'
 mlincom 16-18, detail // other 1 - 3
+putexcel `c90s'17 = `r(p)'
 
 // Combined FT employment
-logit dissolve i.dur_gp i.ft_t1_head##i.cohort_det_v2 i.ft_t1_wife##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0 , cluster(unique_id) or
+logit dissolve i.dur_gp i.ft_t1_head##i.cohort_det_v2 i.ft_t1_wife##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_rec==`e' & no_labor==0 & any_missing==0 , cluster(unique_id) or
 margins, dydx(ft_t1_head ft_t1_wife) at(cohort_det_v2=(1 2 3)) post
 mlincom 1-2, detail // his cohort 1 - cohort 2
+putexcel `c70s'19 = `r(p)'
 mlincom 2-3, detail // his cohort 2 - cohort 3
+putexcel `c80s'19 = `r(p)'
 mlincom 1-3, detail // his cohort 1 - cohort 3
+putexcel `c90s'19 = `r(p)'
 mlincom 4-5, detail // hers cohort 1 - 2
+putexcel `c70s'20 = `r(p)'
 mlincom 5-6, detail // hers cohort 2 - 3
+putexcel `c80s'20 = `r(p)'
 mlincom 4-6, detail // hers cohort 1 - 3
+putexcel `c90s'20 = `r(p)'
 
-****************
-* No College
-****************
-// Paid labor division
-logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & hh_earn_type_t1!=4 & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
-margins, dydx(hh_earn_type_t1) at(cohort_det_v2=(1 2 3)) post
-mlincom 1-2, detail // male BW cohort 1 - cohort 2
-mlincom 2-3, detail // male BW cohort 2 - cohort 3
-mlincom 1-3, detail // male BW cohort 1 - cohort 3
-mlincom 4-5, detail // female BW cohort 1 - 2
-mlincom 5-6, detail // female BW cohort 2 - 3
-mlincom 4-6, detail // female BW cohort 1 - 3
-
-mlincom (1-3)-(4-6), detail // this is, is male BW change larger than female BW change? (maybe?)
-
-// Her share of earnings
-logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
-margins, dydx(female_earn_pct_t1) at(cohort_det_v2=(1 2 3)) post
-mlincom 1-2, detail // cohort 1 - 2
-mlincom 2-3, detail // cohort 2 - 3
-mlincom 1-3, detail // cohort 1 - 3
-
-// Unpaid labor division
-logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
-margins, dydx(housework_bkt_t) at(cohort_det_v2=(1 2 3)) post
-mlincom 1-2, detail // female HW cohort 1 - cohort 2
-mlincom 2-3, detail // female HW cohort 2 - cohort 3
-mlincom 1-3, detail // female HW cohort 1 - cohort 3
-mlincom 4-5, detail // male HW cohort 1 - 2
-mlincom 5-6, detail // male HW cohort 2 - 3
-mlincom 4-6, detail // male HW cohort 1 - 3
-
-// Her share of housework
-logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
-margins, dydx(wife_housework_pct_t) at(cohort_det_v2=(1 2 3)) post
-mlincom 1-2, detail // cohort 1 - 2
-mlincom 2-3, detail // cohort 2 - 3
-mlincom 1-3, detail // cohort 1 - 3
-
-// Combined DoL
-logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
-margins, dydx(earn_housework_det) at(cohort_det_v2=(1 2 3)) post
-mlincom 1-2, detail // second shift cohort 1 - cohort 2
-mlincom 2-3, detail // SS cohort 2 - cohort 3
-mlincom 1-3, detail // SS cohort 1 - cohort 3
-mlincom 4-5, detail // trad cohort 1 - 2
-mlincom 5-6, detail // trad cohort 2 - 3
-mlincom 4-6, detail // trad cohort 1 - 3
-mlincom 7-8, detail // counter-trad 1 - 2
-mlincom 8-9, detail // counter-trad 2 - 3
-mlincom 7-9, detail // counter-trad 1 - 3
-mlincom 10-11, detail // female BW 1 - 2
-mlincom 11-12, detail // female BW 2 - 3
-mlincom 10-12, detail // female BW 1 - 3
-mlincom 13-14, detail // underwork 1 - 2
-mlincom 14-15, detail // underwork 2 - 3
-mlincom 13-15, detail // underwork 1 - 3
-mlincom 16-17, detail // other 1 - 2
-mlincom 17-18, detail // other 2 - 3
-mlincom 16-18, detail // other 1 - 3
-
-// Combined FT employment
-logit dissolve i.dur_gp i.ft_t1_head##i.cohort_det_v2 i.ft_t1_wife##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
-margins, dydx(ft_t1_head ft_t1_wife) at(cohort_det_v2=(1 2 3)) post
-mlincom 1-2, detail // his cohort 1 - cohort 2
-mlincom 2-3, detail // his cohort 2 - cohort 3
-mlincom 1-3, detail // his cohort 1 - cohort 3
-mlincom 4-5, detail // hers cohort 1 - 2
-mlincom 5-6, detail // hers cohort 2 - 3
-mlincom 4-6, detail // hers cohort 1 - 3
+}
 
 /* Code to figure it out: not using most of this; solution that works is incorporated above
 
@@ -1964,6 +2014,44 @@ mlincom 13-15, detail // other 1 - 3
 **# Running into sample size challenges, let's try two cohorts instead of three
 * First, figure out what cutoff is meaningful based on existing groups
 ********************************************************************************
+// let's do a power analysis? (this comes from file "regression" in marriage-pre/dictors paper)
+// can either put in differences and sample size and calculate power OR put in differences and calculate sample size to get diff levels of power.
+// let's calculate predicted probability by cohort and level of education to get base
+
+logit dissolve i.dur_gp i.educ_type##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins cohort_det_v2#educ_type
+
+// now let's get a sense of average diffs across types (just at overall by education level for now for an idea)
+logit dissolve i.dur_gp i.hh_earn_type_t1 i.cohort_det_v2 earnings_ln $controls if educ_type==1 & inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins hh_earn_type_t1
+logit dissolve i.dur_gp i.hh_earn_type_t1 i.cohort_det_v2 earnings_ln $controls if educ_type==2 & inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins hh_earn_type_t1
+logit dissolve i.dur_gp i.hh_earn_type_t1 i.cohort_det_v2 earnings_ln $controls if educ_type==3 & inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins hh_earn_type_t1
+logit dissolve i.dur_gp i.hh_earn_type_t1 i.cohort_det_v2 earnings_ln $controls if educ_type==4 & inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins hh_earn_type_t1
+
+// could also split n into n1 and n2 (for control group) - would this work for divorce?
+// first, let's calculate power with current sample sizes based on maximum difference across groups (do I use total sample or smallest by cohort?) let's do both
+// all couple-years
+power twoproportions .049 .061, n(35789) // neither college: basically 100%
+power twoproportions .025 .035, n(4064) // his college: 46.36%
+power twoproportions .037 .044, n(4369) // her college: 21.66%
+power twoproportions .017 .024, n(10947) // both college: 73.38%
+
+// smallest by cohort
+power twoproportions .049 .061, n(9616) // neither college: 73.27%
+power twoproportions .025 .035, n(1267) // his college: 18.08%
+power twoproportions .037 .044, n(864) // her college: 8.17%
+power twoproportions .017 .024, n(2895) // both college: 26.44%
+
+// then let's calculate what sample would be needed to detect these differences (at 80% power)
+// BUT this assumes they are split equally into the two comparison groups as well
+power twoproportions .049 .061 // neither college: 11330
+power twoproportions .025 .035 // his college: 9134
+power twoproportions .037 .044 // her college: 24896
+power twoproportions .017 .024 // both college: 12864
+
 // 1985 as cutoff (splits in middle)
 gen cohort_test_a = . 
 replace cohort_test_a=1 if inrange(rel_start_all,1970,1985)

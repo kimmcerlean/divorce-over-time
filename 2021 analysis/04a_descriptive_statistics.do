@@ -400,6 +400,14 @@ replace weight_adjust = weight * adjust_no_child if race_head==2 & inrange(surve
 browse survey_yr race_head AGE_YOUNG_CHILD_ weight weight_adjust adjust_child adjust_no_child
 */
 
+// final sample restrictions
+gen any_missing = 0
+replace any_missing = 1 if raceth_head==. | region==. | couple_educ_gp==. | hh_earn_type_t1 ==. | housework_bkt_t==. | earn_housework_det==.
+tab any_missing if inlist(IN_UNIT,0,1,2) & inrange(cohort_det_v2,1,3) , m // less than 5%
+
+gen no_labor = 0 
+replace no_labor = 1 if hh_earn_type_t1==4 | housework_bkt_t ==4
+
 // for ref:
 global controls "c.age_mar_wife c.age_mar_wife_sq c.age_mar_head c.age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region i.cohab_with_wife i.cohab_with_other i.pre_marital_birth  i.num_children i.interval i.home_owner"
 
@@ -544,6 +552,10 @@ forvalues w=1/23{
 unique unique_id partner_unique_id, by(cohort_det_v2)
 unique unique_id partner_unique_id if dissolve==1, by(cohort_det_v2)
 
+unique unique_id partner_unique_id if no_labor==0 & any_missing==0, by(cohort_det_v2)
+unique unique_id partner_unique_id if dissolve==1 & no_labor==0 & any_missing==0, by(cohort_det_v2)
+tab cohort_det_v2 if no_labor==0 & any_missing==0
+
 *No College
 unique unique_id partner_unique_id if couple_educ_gp==0, by(cohort_det_v2)
 unique unique_id partner_unique_id if dissolve==1 & couple_educ_gp==0, by(cohort_det_v2)
@@ -552,6 +564,51 @@ unique unique_id partner_unique_id if dissolve==1 & couple_educ_gp==0, by(cohort
 unique unique_id partner_unique_id if couple_educ_gp==1, by(cohort_det_v2)
 unique unique_id partner_unique_id if dissolve==1 & couple_educ_gp==1, by(cohort_det_v2)
 
+* Detailed education
+tab educ_type cohort_det_v2 if no_labor==0 & any_missing==0
+tab couple_educ_gp cohort_det_v2 if no_labor==0 & any_missing==0
+
+unique unique_id partner_unique_id if educ_type==1 & no_labor==0 & any_missing==0, by(cohort_det_v2) // neither college
+unique unique_id partner_unique_id if dissolve==1 & educ_type==1 & no_labor==0 & any_missing==0 , by(cohort_det_v2)
+
+unique unique_id partner_unique_id if educ_type==2 & no_labor==0 & any_missing==0, by(cohort_det_v2) // his college
+unique unique_id partner_unique_id if dissolve==1 & educ_type==2 & no_labor==0 & any_missing==0 , by(cohort_det_v2)
+
+unique unique_id partner_unique_id if educ_type==3 & no_labor==0 & any_missing==0, by(cohort_det_v2) // her college
+unique unique_id partner_unique_id if dissolve==1 & educ_type==3 & no_labor==0 & any_missing==0 , by(cohort_det_v2)
+
+unique unique_id partner_unique_id if educ_type==4 & no_labor==0 & any_missing==0, by(cohort_det_v2) // both college
+unique unique_id partner_unique_id if dissolve==1 & educ_type==4 & no_labor==0 & any_missing==0 , by(cohort_det_v2)
+
+unique unique_id partner_unique_id if couple_educ_gp==1 & no_labor==0 & any_missing==0, by(cohort_det_v2) // at least one college
+unique unique_id partner_unique_id if dissolve==1 & couple_educ_gp==1 & no_labor==0 & any_missing==0 , by(cohort_det_v2)
+
+// 1990 as cutoff (sort of timing of "stall")
+gen cohort_test_b = . 
+replace cohort_test_b=1 if inrange(rel_start_all,1970,1989)
+replace cohort_test_b=2 if inrange(rel_start_all,1990,2014)
+
+unique unique_id partner_unique_id if no_labor==0 & any_missing==0, by(cohort_test_b)
+unique unique_id partner_unique_id if dissolve==1 & no_labor==0 & any_missing==0, by(cohort_test_b)
+tab cohort_test_b if no_labor==0 & any_missing==0
+
+tab educ_type cohort_test_b if no_labor==0 & any_missing==0
+tab couple_educ_gp cohort_test_b if no_labor==0 & any_missing==0
+
+unique unique_id partner_unique_id if educ_type==1 & no_labor==0 & any_missing==0, by(cohort_test_b) // neither college
+unique unique_id partner_unique_id if dissolve==1 & educ_type==1 & no_labor==0 & any_missing==0 , by(cohort_test_b)
+
+unique unique_id partner_unique_id if educ_type==2 & no_labor==0 & any_missing==0, by(cohort_test_b) // his college
+unique unique_id partner_unique_id if dissolve==1 & educ_type==2 & no_labor==0 & any_missing==0 , by(cohort_test_b)
+
+unique unique_id partner_unique_id if educ_type==3 & no_labor==0 & any_missing==0, by(cohort_test_b) // her college
+unique unique_id partner_unique_id if dissolve==1 & educ_type==3 & no_labor==0 & any_missing==0 , by(cohort_test_b)
+
+unique unique_id partner_unique_id if educ_type==4 & no_labor==0 & any_missing==0, by(cohort_test_b) // both college
+unique unique_id partner_unique_id if dissolve==1 & educ_type==4 & no_labor==0 & any_missing==0 , by(cohort_test_b)
+
+unique unique_id partner_unique_id if couple_educ_gp==1 & no_labor==0 & any_missing==0, by(cohort_test_b) // at least one college
+unique unique_id partner_unique_id if dissolve==1 & couple_educ_gp==1 & no_labor==0 & any_missing==0 , by(cohort_test_b)
 
 ********************************************************************************
 **# Weighted

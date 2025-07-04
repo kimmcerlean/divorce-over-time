@@ -51,7 +51,7 @@ if `"`c(hostname)'"' == "LAPTOP-TP2VHI6B"{
 
 set maxvar 10000
 
-net install mecompare, from("https://tdmize.github.io/data/") replace
+// net install mecompare, from("https://tdmize.github.io/data/") replace
 // ssc install spost13_ado, replace
 
 ********************************************************************************
