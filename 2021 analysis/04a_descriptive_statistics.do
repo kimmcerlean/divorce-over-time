@@ -31,6 +31,11 @@ replace cohort_det_v2=3 if inrange(rel_start_all,1990,2014)
 label define cohort_det_v2 1 "1970s" 2 "1980s" 3 "1990s+" 
 label values cohort_det_v2 cohort_det_v2
 
+// durs 33-38 causing problems because perfectly predict outcome. What happens if I group all above 30?
+gen dur_gp = dur
+replace dur_gp = 31 if dur >=31 & dur < 2000
+tab dur_gp if inlist(IN_UNIT,0,1,2) & inlist(cohort,0,1)
+
 ********************************************************************************
 * Additional sample restrictions
 ********************************************************************************
@@ -402,19 +407,24 @@ browse survey_yr race_head AGE_YOUNG_CHILD_ weight weight_adjust adjust_child ad
 
 // final sample restrictions
 gen any_missing = 0
-replace any_missing = 1 if raceth_head==. | region==. | couple_educ_gp==. | hh_earn_type_t1 ==. | housework_bkt_t==. | earn_housework_det==.
+replace any_missing = 1 if raceth_head==. | region==. | couple_educ_gp==. | educ_type==. | hh_earn_type_t1 ==. | housework_bkt_t==. | earn_housework_det==.
 tab any_missing if inlist(IN_UNIT,0,1,2) & inrange(cohort_det_v2,1,3) , m // less than 5%
 
 gen no_labor = 0 
 replace no_labor = 1 if hh_earn_type_t1==4 | housework_bkt_t ==4
 
 // for ref:
-global controls "c.age_mar_wife c.age_mar_wife_sq c.age_mar_head c.age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region i.cohab_with_wife i.cohab_with_other i.pre_marital_birth  i.num_children i.interval i.home_owner"
+global controls "c.age_mar_wife c.age_mar_wife_sq c.age_mar_head c.age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region i.cohab_with_wife i.cohab_with_other i.pre_marital_birth  i.num_children i.interval i.home_owner i.educ_type"
 
 ********************************************************************************
 **# Table starts here: over time
 ********************************************************************************
 keep if inrange(cohort_det_v2,1,3) & inlist(IN_UNIT,0,1,2)
+keep if any_missing==0
+keep if no_labor==0
+
+unique unique_id
+unique unique_id if dissolve==1
 
 tab hh_earn_type_t1, gen(earn_type)
 tab housework_bkt_t, gen(hw_type)
@@ -547,7 +557,7 @@ forvalues w=1/23{
 }
 
 
-// uniques
+**# Uniques
 *Overall
 unique unique_id partner_unique_id, by(cohort_det_v2)
 unique unique_id partner_unique_id if dissolve==1, by(cohort_det_v2)
@@ -559,14 +569,17 @@ tab cohort_det_v2 if no_labor==0 & any_missing==0
 *No College
 unique unique_id partner_unique_id if couple_educ_gp==0, by(cohort_det_v2)
 unique unique_id partner_unique_id if dissolve==1 & couple_educ_gp==0, by(cohort_det_v2)
+tab cohort_det_v2 if couple_educ_gp==0 & dur_gp != 29 // actual analytical sample
 
 *College
 unique unique_id partner_unique_id if couple_educ_gp==1, by(cohort_det_v2)
 unique unique_id partner_unique_id if dissolve==1 & couple_educ_gp==1, by(cohort_det_v2)
+tab cohort_det_v2 if couple_educ_gp==1 & dur_gp ! = 31 // actual analytical sample
+
+tab couple_educ_gp cohort_det_v2 if no_labor==0 & any_missing==0
 
 * Detailed education
 tab educ_type cohort_det_v2 if no_labor==0 & any_missing==0
-tab couple_educ_gp cohort_det_v2 if no_labor==0 & any_missing==0
 
 unique unique_id partner_unique_id if educ_type==1 & no_labor==0 & any_missing==0, by(cohort_det_v2) // neither college
 unique unique_id partner_unique_id if dissolve==1 & educ_type==1 & no_labor==0 & any_missing==0 , by(cohort_det_v2)

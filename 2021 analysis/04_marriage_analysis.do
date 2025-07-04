@@ -472,7 +472,7 @@ graph query colorstyle
 ********************************************************************************
 unique unique_id if inlist(IN_UNIT,0,1,2) & inlist(cohort,0,1) // analytical sample - this is what is on page 9
 unique unique_id if inlist(IN_UNIT,0,1,2) & inlist(cohort,0,1) & no_labor==0 & any_missing==0 // probably should be new analytical sample
-unique unique_id if inlist(IN_UNIT,0,1,2) & inlist(cohort,0,1) & dissolve==1 // divorces analytical sample
+unique unique_id if inlist(IN_UNIT,0,1,2) & inlist(cohort,0,1) & no_labor==0 & any_missing==0 & dissolve==1 // divorces analytical sample
 
 // FIGURE 1: Show changes in divorce rates over time, descriptively
 local controls "c.age_mar_wife c.age_mar_wife_sq c.age_mar_head c.age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region i.cohab_with_wife i.cohab_with_other i.pre_marital_birth  i.num_children i.interval i.home_owner"
@@ -2488,7 +2488,7 @@ margins, dydx(earn_type_hw) at(cohort_det_v2=(1 2 3)) post
 outreg2 using "$results/dissolution_time_robustness.xls", sideway stats(coef se pval) ctitle(NC1) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
 
 // what happens if I don't include survey interval control
-local c_test "c.age_mar_wife c.age_mar_wife_sq c.age_mar_head c.age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region i.cohab_with_wife i.cohab_with_other i.pre_marital_birth  i.num_children i.home_owner" // i.interval 
+local c_test "c.age_mar_wife c.age_mar_wife_sq c.age_mar_head c.age_mar_head_sq i.raceth_head i.same_race i.either_enrolled i.region i.cohab_with_wife i.cohab_with_other i.pre_marital_birth  i.num_children i.home_owner i.educ_type" // i.interval 
 
 * Overall
 // Paid labor division
