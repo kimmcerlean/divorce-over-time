@@ -1285,6 +1285,140 @@ margins cohort#hh_earn_type_t1
 */
 
 ********************************************************************************
+**# I also want to export the raw predicted probabilities (not AMES)
+********************************************************************************
+// The interactions aren't posting with above code, so have to do separately
+
+****************
+* Overall
+****************
+// Paid labor division
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or // overall
+margins hh_earn_type_t1, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(Overall1) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) replace
+
+// Unpaid labor division
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & housework_bkt_t!=4 & no_labor==0 & any_missing==0, cluster(unique_id) or // overall
+margins housework_bkt_t, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(Overall2) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+	
+// Combined division of labor (just AMEs) - ALT measure
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins earn_housework_det, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(Overall3) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Combined FT employment (Just AMEs)
+logit dissolve i.dur_gp i.ft_t1_head##i.cohort_det_v2 i.ft_t1_wife##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or // overall
+margins ft_t1_head ft_t1_wife, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(Overall4) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Her share of earnings
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or // overall
+margins, at(female_earn_pct_t1=(0 .25 .5 .75 1) cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(Overall5) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+	// bucketed
+	logit dissolve i.dur_gp i.female_earn_bucket##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or // overall
+	margins female_earn_bucket, at(cohort_det_v2=(1 2 3)) post
+	outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(Overall6) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+	
+// Her share of housework
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or // overall
+margins, at(wife_housework_pct_t=(0 .25 .5 .75 1) cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(Overall7) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+	// bucketed
+	logit dissolve i.dur_gp ib9.female_hw_bucket##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or // overall
+	margins female_hw_bucket, at(cohort_det_v2=(1 2 3)) post
+	outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(Overall8) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+****************
+* College
+****************
+// Paid labor division
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & hh_earn_type_t1!=4 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins hh_earn_type_t1, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(College1) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Unpaid labor division
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & housework_bkt_t!=4 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins housework_bkt_t, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(College2) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+	
+// Combined division of labor (just AMEs) - ALT measure
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins earn_housework_det, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(College3) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Combined FT employment (Just AMEs)
+logit dissolve i.dur_gp i.ft_t1_head##i.cohort_det_v2 i.ft_t1_wife##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins ft_t1_head ft_t1_wife, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(College4) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Her share of earnings
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, at(female_earn_pct_t1=(0 .25 .5 .75 1) cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(College5) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+	// bucketed
+	logit dissolve i.dur_gp i.female_earn_bucket##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+	margins female_earn_bucket, at(cohort_det_v2=(1 2 3)) post
+	outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(College6) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+	
+// Her share of housework
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, at(wife_housework_pct_t=(0 .25 .5 .75 1) cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(College7) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+	// bucketed
+	logit dissolve i.dur_gp ib9.female_hw_bucket##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==1 & no_labor==0 & any_missing==0, cluster(unique_id) or
+	margins female_hw_bucket, at(cohort_det_v2=(1 2 3)) post
+	outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(College8) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+****************
+* No College
+****************
+// Paid labor division
+logit dissolve i.dur_gp i.hh_earn_type_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & hh_earn_type_t1!=4 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins hh_earn_type_t1, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(NoColl1) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Unpaid labor division
+logit dissolve i.dur_gp i.housework_bkt_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & housework_bkt_t!=4 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins housework_bkt_t, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(NoColl2) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+	
+// Combined division of labor (just AMEs) - ALT measure
+logit dissolve i.dur_gp i.earn_housework_det##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins earn_housework_det, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(NoColl3) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Combined FT employment (Just AMEs)
+logit dissolve i.dur_gp i.ft_t1_head##i.cohort_det_v2 i.ft_t1_wife##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins ft_t1_head ft_t1_wife, at(cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(NoColl4) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+// Her share of earnings
+logit dissolve i.dur_gp c.female_earn_pct_t1##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, at(female_earn_pct_t1=(0 .25 .5 .75 1) cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(NoColl5) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+	// bucketed
+	logit dissolve i.dur_gp i.female_earn_bucket##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
+	margins female_earn_bucket, at(cohort_det_v2=(1 2 3)) post
+	outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(NoColl6) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+	
+// Her share of housework
+logit dissolve i.dur_gp c.wife_housework_pct_t##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
+margins, at(wife_housework_pct_t=(0 .25 .5 .75 1) cohort_det_v2=(1 2 3)) post
+outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(NoColl7) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+	// bucketed
+	logit dissolve i.dur_gp ib9.female_hw_bucket##i.cohort_det_v2 earnings_ln $controls if inlist(IN_UNIT,0,1,2) & couple_educ_gp==0 & no_labor==0 & any_missing==0, cluster(unique_id) or
+	margins female_hw_bucket, at(cohort_det_v2=(1 2 3)) post
+	outreg2 using "$results/dissolution_time_trends_margins.xls", sideway stats(coef se pval) ctitle(NoColl8) dec(4) alpha(0.001, 0.01, 0.05, 0.10) symbol(***, **, *, +) append
+
+********************************************************************************
 **# Over time model comparisons
 * (WALD tests for over time comparisons in Tables 2 and 3)
 * Just results I decided to use from above
