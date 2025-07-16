@@ -1316,7 +1316,11 @@ browse unique_id partner_unique_id survey_yr rel_start_all rel_end_all marital_s
 // first need to figure out how to keep only one respondent per HH. really doesn't matter gender of who I keep, because all variables are denoted by head / wife, NOT respondent.
 bysort survey_yr FAMILY_INTERVIEW_NUM_ : egen per_id = rank(unique_id)
 browse survey_yr FAMILY_INTERVIEW_NUM_  unique_id partner_unique_id per_id
+bysort survey_yr FAMILY_INTERVIEW_NUM_ : egen num_per = max(per_id)
+tab num_per, m // who are those with just 1 person - do we have enough info?
 
+// browse survey_yr FAMILY_INTERVIEW_NUM_ RESPONDENT_WHO SEX per_id unique_id
+// browse survey_yr FAMILY_INTERVIEW_NUM_ RESPONDENT_WHO SEX per_id unique_id earnings_t1_head earnings_t1_wife housework_head housework_wife if num_per==1
 // browse survey_yr FAMILY_INTERVIEW_NUM_ per_id unique_id if inlist(unique_id,12,13)
 
 keep if per_id==1
