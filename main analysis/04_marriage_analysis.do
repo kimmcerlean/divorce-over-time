@@ -199,6 +199,14 @@ tab earn_type_hw earn_housework_det, m
 
 tab hh_earn_type_t1 housework_bkt_t if earn_housework_det==7
 
+gen underwork = .
+replace underwork = 0 if inlist(earn_housework_det,1,2,3,4,5,7)
+replace underwork = 1 if earn_housework_det==6
+
+tab earn_housework_det underwork 
+tab earn_type_hw underwork, row
+tab earn_type_hw underwork if inlist(IN_UNIT,0,1,2) & inrange(cohort_det_v2,1,3) & no_labor==0 & any_missing==0, row
+
 // this doesn't capture OVERWORK
 sum weekly_hrs_t1_head if ft_pt_t1_head==2, detail
 sum weekly_hrs_t1_wife if ft_pt_t1_wife==2, detail
@@ -2381,18 +2389,27 @@ margins cohort_det_v2#educ_type
 logit dissolve i.dur_gp i.hh_earn_type_t1 i.cohort_det_v2 earnings_ln $controls if educ_type==1 & inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins hh_earn_type_t1
 margins
+tab cohort_det_v2 dissolve if e(sample)
+
 logit dissolve i.dur_gp i.hh_earn_type_t1 i.cohort_det_v2 earnings_ln $controls if educ_type==2 & inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins hh_earn_type_t1
 margins
+tab cohort_det_v2 dissolve if e(sample)
+
 logit dissolve i.dur_gp i.hh_earn_type_t1 i.cohort_det_v2 earnings_ln $controls if educ_type==3 & inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins hh_earn_type_t1
 margins
+tab cohort_det_v2 dissolve if e(sample)
+
 logit dissolve i.dur_gp i.hh_earn_type_t1 i.cohort_det_v2 earnings_ln $controls if educ_type==4 & inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins hh_earn_type_t1
 margins
+tab cohort_det_v2 dissolve if e(sample)
+
 logit dissolve i.dur_gp i.hh_earn_type_t1 i.cohort_det_v2 earnings_ln $controls if couple_educ_gp==1 & inlist(IN_UNIT,0,1,2) & no_labor==0 & any_missing==0, cluster(unique_id) or
 margins hh_earn_type_t1
 margins
+tab cohort_det_v2 dissolve if e(sample)
 
 // could also split n into n1 and n2 (for control group) - would this work for divorce?
 // first, let's calculate power with current sample sizes based on maximum difference across groups (do I use total sample or smallest by cohort?) let's do both
